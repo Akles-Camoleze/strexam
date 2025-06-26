@@ -28,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isCreatingAccount ? 'Create Account' : 'Login'),
+        title: Text(_isCreatingAccount ? 'Criar Conta' : 'Login'),
       ),
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {

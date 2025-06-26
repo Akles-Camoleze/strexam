@@ -24,7 +24,7 @@ class _JoinExamScreenState extends State<JoinExamScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Join Exam'),
+        title: const Text('Entrar no Exame'),
       ),
       body: Consumer<ExamProvider>(
         builder: (context, examProvider, _) {
@@ -43,7 +43,7 @@ class _JoinExamScreenState extends State<JoinExamScreen> {
                   ),
                   const SizedBox(height: 32),
                   Text(
-                    'Join an Exam',
+                    'Participar de um Exame',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Colors.green,
@@ -52,7 +52,7 @@ class _JoinExamScreenState extends State<JoinExamScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Enter the exam code provided by your instructor',
+                    'Digite o código do exame fornecido pelo seu instrutor',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -63,24 +63,23 @@ class _JoinExamScreenState extends State<JoinExamScreen> {
                   TextFormField(
                     controller: _joinCodeController,
                     decoration: const InputDecoration(
-                      labelText: 'Exam Code',
+                      labelText: 'Código do Exame',
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.vpn_key),
-                      hintText: 'Enter 6-character code',
+                      hintText: 'Insira o código de 6 caracteres',
                     ),
                     textCapitalization: TextCapitalization.characters,
                     maxLength: 6,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter the exam code';
+                        return 'Por favor, insira o código do exame';
                       }
                       if (value.length != 6) {
-                        return 'Exam code must be 6 characters';
+                        return 'O código do exame deve conter 6 caracteres';
                       }
                       return null;
                     },
                     onChanged: (value) {
-                      // Auto-format to uppercase
                       final upperValue = value.toUpperCase();
                       if (upperValue != value) {
                         _joinCodeController.value = _joinCodeController.value.copyWith(
@@ -124,7 +123,7 @@ class _JoinExamScreenState extends State<JoinExamScreen> {
                     ElevatedButton.icon(
                       onPressed: _joinExam,
                       icon: const Icon(Icons.login),
-                      label: const Text('Join Exam'),
+                      label: const Text('Entrar no Exame'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -145,7 +144,7 @@ class _JoinExamScreenState extends State<JoinExamScreen> {
                               Icon(Icons.info, color: Colors.blue[700]),
                               const SizedBox(width: 8),
                               Text(
-                                'How to join an exam:',
+                                'Como participar de um exame:',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.blue[700],
@@ -155,10 +154,10 @@ class _JoinExamScreenState extends State<JoinExamScreen> {
                           ),
                           const SizedBox(height: 8),
                           const Text(
-                            '1. Get the 6-character exam code from your instructor\n'
-                            '2. Enter the code above\n'
-                            '3. Click "Join Exam" to start\n'
-                            '4. Make sure you have a stable internet connection',
+                            '1. Obtenha o código de exame de 6 caracteres\n'
+                            '2. Digite o código acima\n'
+                            '3. Clique em "Entrar no Exame" para começar\n'
+                            '4. Certifique-se de ter uma conexão de internet estável',
                             style: TextStyle(fontSize: 14),
                           ),
                         ],
@@ -185,7 +184,7 @@ class _JoinExamScreenState extends State<JoinExamScreen> {
     if (authProvider.currentUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please login first'),
+          content: Text('Por favor, realize o login primeiro'),
           backgroundColor: Colors.red,
         ),
       );

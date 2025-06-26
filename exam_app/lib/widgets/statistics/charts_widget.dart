@@ -25,7 +25,7 @@ class ChartsWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Performance Distribution',
+                  'Distribuição de Desempenho',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -50,7 +50,7 @@ class ChartsWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Completion Status',
+                  'Status de conclusão',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -136,10 +136,10 @@ class ChartsWidget extends StatelessWidget {
   }
 
   Color _getPerformanceColor(String range) {
-    if (range.contains('Excellent')) return Colors.green;
-    if (range.contains('Good')) return Colors.lightGreen;
-    if (range.contains('Average')) return Colors.orange;
-    if (range.contains('Below')) return Colors.deepOrange;
+    if (range.contains('Excelente')) return Colors.green;
+    if (range.contains('Bom')) return Colors.lightGreen;
+    if (range.contains('Médio')) return Colors.orange;
+    if (range.contains('Ruim')) return Colors.deepOrange;
     return Colors.red;
   }
 

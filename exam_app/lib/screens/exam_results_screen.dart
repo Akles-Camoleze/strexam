@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/exam_provider.dart';
-import '../widgets/common/loading_widget.dart';
 
 class ExamResultsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Exam Results'),
+        title: const Text('Resultados do Exame'),
         automaticallyImplyLeading: false,
         actions: [
           TextButton(
@@ -30,7 +30,7 @@ class ExamResultsScreen extends StatelessWidget {
           final exam = examProvider.currentExam;
 
           if (session == null || exam == null) {
-            return const Center(child: Text('No exam data available'));
+            return const Center(child: Text('Dados do exame não disponíveis'));
           }
 
           return Padding(
@@ -58,7 +58,7 @@ class ExamResultsScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       const Text(
-                        'Exam Completed!',
+                        'Exame Finalizado!',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -86,7 +86,7 @@ class ExamResultsScreen extends StatelessWidget {
                     children: [
                       // Score card
                       _buildResultCard(
-                        'Your Score',
+                        'Sua Nota',
                         '${session.totalScore} / ${session.maxScore}',
                         session.percentage != null
                             ? '${session.percentage!.toStringAsFixed(1)}%'
@@ -99,9 +99,9 @@ class ExamResultsScreen extends StatelessWidget {
 
                       // Questions answered card
                       _buildResultCard(
-                        'Questions Answered',
+                        'Questões Respondidas',
                         '${examProvider.answeredQuestionsCount}',
-                        'out of ${exam.questions?.length ?? 0}',
+                        'de ${exam.questions?.length ?? 0}',
                         Icons.quiz,
                         Colors.blue,
                       ),
@@ -110,9 +110,9 @@ class ExamResultsScreen extends StatelessWidget {
 
                       // Time taken card
                       _buildResultCard(
-                        'Time Taken',
+                        'Tempo Gasto',
                         _getTimeTaken(session, exam),
-                        exam.timeLimit != null ? 'Limit: ${exam.timeLimit} min' : 'No time limit',
+                        exam.timeLimit != null ? 'Limite: ${exam.timeLimit} min' : 'Sem tempo limite',
                         Icons.timer,
                         Colors.orange,
                       ),
@@ -129,7 +129,7 @@ class ExamResultsScreen extends StatelessWidget {
                                 Navigator.of(context).popUntil((route) => route.isFirst);
                               },
                               icon: const Icon(Icons.home),
-                              label: const Text('Go to Home'),
+                              label: const Text('Tela Inicial'),
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -139,12 +139,12 @@ class ExamResultsScreen extends StatelessWidget {
                                 // TODO: Navigate to detailed results
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Detailed results coming soon!'),
+                                    content: Text('Resultados detalhados em breve!'),
                                   ),
                                 );
                               },
                               icon: const Icon(Icons.analytics),
-                              label: const Text('View Details'),
+                              label: const Text('Ver Detalhes'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.green,
                               ),

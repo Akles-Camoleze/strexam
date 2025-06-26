@@ -183,26 +183,26 @@ class StatisticsProvider with ChangeNotifier {
     if (_examStatistics == null) return {};
 
     final distribution = <String, int>{
-      'Excellent (90-100%)': 0,
-      'Good (80-89%)': 0,
-      'Average (70-79%)': 0,
-      'Below Average (60-69%)': 0,
-      'Poor (0-59%)': 0,
+      'Excelente (90-100%)': 0,
+      'Bom (80-89%)': 0,
+      'Média (70-79%)': 0,
+      'Abaixo da Média (60-69%)': 0,
+      'Ruim (0-59%)': 0,
     };
 
     for (final user in _examStatistics!.userStatistics) {
       final percentage = user.currentPercentage;
 
       if (percentage >= 90) {
-        distribution['Excellent (90-100%)'] = distribution['Excellent (90-100%)']! + 1;
+        distribution['Excelente (90-100%)'] = distribution['Excelente (90-100%)']! + 1;
       } else if (percentage >= 80) {
-        distribution['Good (80-89%)'] = distribution['Good (80-89%)']! + 1;
+        distribution['Bom (80-89%)'] = distribution['Bom (80-89%)']! + 1;
       } else if (percentage >= 70) {
-        distribution['Average (70-79%)'] = distribution['Average (70-79%)']! + 1;
+        distribution['Média (70-79%)'] = distribution['Média (70-79%)']! + 1;
       } else if (percentage >= 60) {
-        distribution['Below Average (60-69%)'] = distribution['Below Average (60-69%)']! + 1;
+        distribution['Abaixo da Média (60-69%)'] = distribution['Abaixo da Média (60-69%)']! + 1;
       } else {
-        distribution['Poor (0-59%)'] = distribution['Poor (0-59%)']! + 1;
+        distribution['Ruim (0-59%)'] = distribution['Ruim (0-59%)']! + 1;
       }
     }
 

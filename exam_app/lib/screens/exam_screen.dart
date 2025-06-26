@@ -30,14 +30,14 @@ class _ExamScreenState extends State<ExamScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('No Active Exam'),
-        content: const Text('No active exam session found. Please join an exam first.'),
+        title: const Text('Nenhum exame ativo'),
+        content: const Text('Nenhuma sessão de exame ativa encontrada. Entre em um exame primeiro.'),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).popUntil((route) => route.isFirst);
             },
-            child: const Text('Go to Home'),
+            child: const Text('Ir Para Tela Inicial'),
           ),
         ],
       ),
@@ -52,7 +52,7 @@ class _ExamScreenState extends State<ExamScreen> {
         appBar: AppBar(
           title: Consumer<ExamProvider>(
             builder: (context, examProvider, _) {
-              return Text(examProvider.currentExam?.title ?? 'Exam');
+              return Text(examProvider.currentExam?.title ?? 'Exame');
             },
           ),
           automaticallyImplyLeading: false,
@@ -76,7 +76,7 @@ class _ExamScreenState extends State<ExamScreen> {
                   children: [
                     Icon(Icons.error_outline, size: 80, color: Colors.grey),
                     SizedBox(height: 16),
-                    Text('No active exam session'),
+                    Text('Nenhuma sessão de exame ativa'),
                   ],
                 ),
               );
@@ -92,7 +92,7 @@ class _ExamScreenState extends State<ExamScreen> {
                   children: [
                     Icon(Icons.quiz_outlined, size: 80, color: Colors.grey),
                     SizedBox(height: 16),
-                    Text('No questions available in this exam'),
+                    Text('Nenhuma questão disponível neste exame'),
                   ],
                 ),
               );
@@ -124,7 +124,7 @@ class _ExamScreenState extends State<ExamScreen> {
                 // Question Content
                 Expanded(
                   child: examProvider.currentQuestion == null
-                      ? const Center(child: Text('Question not found'))
+                      ? const Center(child: Text('Questão não encotrada'))
                       : Padding(
                     padding: const EdgeInsets.all(16),
                     child: QuestionWidget(
@@ -161,7 +161,7 @@ class _ExamScreenState extends State<ExamScreen> {
                                 ? examProvider.previousQuestion
                                 : null,
                             icon: const Icon(Icons.arrow_back),
-                            label: const Text('Previous'),
+                            label: const Text('Anterior'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.grey[600],
                               disabledBackgroundColor: Colors.grey[300],
@@ -182,7 +182,7 @@ class _ExamScreenState extends State<ExamScreen> {
                               ),
                             ),
                             Text(
-                              '${examProvider.answeredQuestionsCount} answered',
+                              '${examProvider.answeredQuestionsCount} respondida',
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: Colors.grey[600],
                               ),
@@ -207,7 +207,7 @@ class _ExamScreenState extends State<ExamScreen> {
                               ),
                             )
                                 : const Icon(Icons.check),
-                            label: const Text('Complete'),
+                            label: const Text('Finalizar'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
                             ),
@@ -217,7 +217,7 @@ class _ExamScreenState extends State<ExamScreen> {
                                 ? examProvider.nextQuestion
                                 : null,
                             icon: const Icon(Icons.arrow_forward),
-                            label: const Text('Next'),
+                            label: const Text('Próximo'),
                             style: ElevatedButton.styleFrom(
                               disabledBackgroundColor: Colors.grey[300],
                             ),
@@ -236,7 +236,7 @@ class _ExamScreenState extends State<ExamScreen> {
           onPressed: _showExitDialog,
           backgroundColor: Colors.red,
           child: const Icon(Icons.exit_to_app),
-          tooltip: 'Exit Exam',
+          tooltip: 'Sair do Exame',
         ),
       ),
     );
@@ -260,21 +260,21 @@ class _ExamScreenState extends State<ExamScreen> {
     return await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Exit Exam?'),
+        title: const Text('Sair do Exame?'),
         content: const Text(
-          'Are you sure you want to exit the exam? Your current progress will be saved, but you may not be able to continue depending on the exam settings.',
+          'Tem certeza de que deseja sair do exame? Seu progresso atual será salvo, mas talvez você não consiga continuar, dependendo das configurações do exame.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text('Cancelar'),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context, true);
               _exitExam();
             },
-            child: const Text('Exit'),
+            child: const Text('Sair'),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
           ),
         ],
@@ -292,18 +292,18 @@ class _ExamScreenState extends State<ExamScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Complete Exam?'),
+        title: const Text('Finalizar Exame?'),
         content: const Text(
-          'Are you sure you want to complete the exam? You cannot make changes after submission.',
+          'Tem certeza de que deseja finalizar o exame? Não será possível fazer alterações após o envio.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Complete'),
+            child: const Text('Finalizar'),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
           ),
         ],
@@ -318,7 +318,7 @@ class _ExamScreenState extends State<ExamScreen> {
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Exam completed successfully!'),
+            content: Text('Exame finalizado com sucesso!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -334,7 +334,7 @@ class _ExamScreenState extends State<ExamScreen> {
         // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(examProvider.error ?? 'Failed to complete exam'),
+            content: Text(examProvider.error ?? 'Falha ao finalizar o exame'),
             backgroundColor: Colors.red,
           ),
         );

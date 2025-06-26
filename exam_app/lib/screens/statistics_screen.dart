@@ -42,7 +42,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with TickerProvider
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Exam Statistics'),
+        title: const Text('Estastísticas do Exame'),
         actions: [
           IconButton(
             onPressed: _loadStatistics,
@@ -52,16 +52,16 @@ class _StatisticsScreenState extends State<StatisticsScreen> with TickerProvider
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(icon: Icon(Icons.dashboard), text: 'Overview'),
-            Tab(icon: Icon(Icons.quiz), text: 'Questions'),
-            Tab(icon: Icon(Icons.people), text: 'Students'),
+            Tab(icon: Icon(Icons.dashboard), text: 'Visão Geral'),
+            Tab(icon: Icon(Icons.quiz), text: 'Questões'),
+            Tab(icon: Icon(Icons.people), text: 'Alunos'),
           ],
         ),
       ),
       body: Consumer<StatisticsProvider>(
         builder: (context, statisticsProvider, _) {
           if (statisticsProvider.isLoading) {
-            return const LoadingWidget(message: 'Loading statistics...');
+            return const LoadingWidget(message: 'Carregando estastísticas...');
           }
 
           if (statisticsProvider.error != null) {
@@ -72,7 +72,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with TickerProvider
                   Icon(Icons.error, size: 80, color: Colors.red[300]),
                   const SizedBox(height: 16),
                   Text(
-                    'Error loading statistics',
+                    'Erro ao carregar estastísticas',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
@@ -81,7 +81,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with TickerProvider
                   ElevatedButton.icon(
                     onPressed: _loadStatistics,
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Retry'),
+                    label: const Text('Tentar Novamente'),
                   ),
                 ],
               ),
@@ -89,7 +89,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with TickerProvider
           }
 
           if (statisticsProvider.examStatistics == null) {
-            return const Center(child: Text('No statistics available'));
+            return const Center(child: Text('Nenhuma estastística disponível'));
           }
 
           return TabBarView(
@@ -120,25 +120,25 @@ class _StatisticsScreenState extends State<StatisticsScreen> with TickerProvider
           mainAxisSpacing: 16,
           children: [
             _buildStatCard(
-              'Total Participants',
+              'Total de Participantes',
               stats.totalParticipants.toString(),
               Icons.people,
               Colors.blue,
             ),
             _buildStatCard(
-              'Completion Rate',
+              'Taxa de conclusão',
               '${stats.completionRate.toStringAsFixed(1)}%',
               Icons.check_circle,
               Colors.green,
             ),
             _buildStatCard(
-              'Average Score',
+              'Nota Média',
               '${stats.averageScore.toStringAsFixed(1)}%',
               Icons.score,
               Colors.orange,
             ),
             _buildStatCard(
-              'Total Questions',
+              'Total de Questões',
               stats.totalQuestions.toString(),
               Icons.quiz,
               Colors.purple,

@@ -245,13 +245,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Text('Code: ${exam.joinCode}'),
+                    Text('Código: ${exam.joinCode}'),
                     const SizedBox(width: 16),
                     Text('Status: ${exam.status.name.toUpperCase()}'),
                   ],
                 ),
                 if (exam.timeLimit != null)
-                  Text('Time Limit: ${exam.timeLimit} minutes'),
+                  Text('Duração: ${exam.timeLimit} minutos'),
               ],
             ),
             trailing: PopupMenuButton<String>(
@@ -264,7 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Icon(Icons.play_arrow, color: Colors.green),
                         SizedBox(width: 8),
-                        Text('Activate'),
+                        Text('Ativar'),
                       ],
                     ),
                   ),
@@ -274,7 +274,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Icon(Icons.analytics, color: Colors.blue),
                       SizedBox(width: 8),
-                      Text('Statistics'),
+                      Text('Estastísticas'),
                     ],
                   ),
                 ),
@@ -284,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Icon(Icons.info, color: Colors.grey),
                       SizedBox(width: 8),
-                      Text('Details'),
+                      Text('Detalhes'),
                     ],
                   ),
                 ),
@@ -345,7 +345,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (success && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Exam activated successfully!'),
+              content: Text('Exame ativado com sucesso!'),
               backgroundColor: Colors.green,
             ),
           );
@@ -383,15 +383,15 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        content: const Text('Tem certeza de que deseja sair??'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Logout'),
+            child: const Text('Sair'),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
           ),
         ],
@@ -409,7 +409,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Logged out successfully'),
+            content: Text('Desconectado com sucesso'),
             backgroundColor: Colors.blue,
           ),
         );

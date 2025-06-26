@@ -37,7 +37,7 @@ class TimerWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Time Remaining',
+                    'Tempo Restante',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: getColor(),

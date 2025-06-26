@@ -20,7 +20,7 @@ class UserStatsWidget extends StatelessWidget {
         if (topPerformers.isNotEmpty) ...[
           _buildSectionHeader(
             context,
-            'Top Performers',
+            'Melhores Desempenhos',
             Icons.emoji_events,
             Colors.amber,
           ),
@@ -36,7 +36,7 @@ class UserStatsWidget extends StatelessWidget {
         // All Students
         _buildSectionHeader(
           context,
-          'All Students',
+          'Todos Alunos',
           Icons.people,
           Colors.blue,
         ),
@@ -251,16 +251,16 @@ class UserStatsWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Progress: ${user.questionsAnswered} answered',
+                        'Progresso: ${user.questionsAnswered} respondido',
                         style: const TextStyle(fontSize: 14),
                       ),
                       Text(
-                        'Correct: ${user.correctAnswers}',
+                        'Correta: ${user.correctAnswers}',
                         style: const TextStyle(fontSize: 14),
                       ),
                       if (user.startedAt != null)
                         Text(
-                          'Started: ${_formatDateTime(user.startedAt!)}',
+                          'Iniciado: ${_formatDateTime(user.startedAt!)}',
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.grey,

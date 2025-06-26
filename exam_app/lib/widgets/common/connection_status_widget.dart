@@ -22,7 +22,7 @@ class ConnectionStatusWidget extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           Text(
-            isConnected ? 'Live' : 'Offline',
+            isConnected ? 'Ao vivo' : 'Offline',
             style: TextStyle(
               color: isConnected ? Colors.green : Colors.red,
               fontSize: 12,

@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => StatisticsProvider()),
       ],
       child: MaterialApp(
-        title: 'Exam App',
+        title: 'Strexam',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Colors.blue,

@@ -20,11 +20,11 @@ class ProgressWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Question $current of $total',
+              'Questão $current de $total',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(
-              '${(progress * 100).toStringAsFixed(0)}% Complete',
+              '${(progress * 100).toStringAsFixed(0)}% Finalizado',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ],

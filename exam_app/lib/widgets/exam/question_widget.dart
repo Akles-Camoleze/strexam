@@ -46,7 +46,7 @@ class QuestionWidget extends StatelessWidget {
                       backgroundColor: Colors.blue[100],
                     ),
                     Chip(
-                      label: Text('${question.points} point${question.points > 1 ? 's' : ''}'),
+                      label: Text('${question.points} ponto${question.points > 1 ? 's' : ''}'),
                       backgroundColor: Colors.green[100],
                     ),
                   ],
@@ -81,7 +81,7 @@ class QuestionWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Your Answer:',
+          'Sua resposta:',
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -91,7 +91,7 @@ class QuestionWidget extends StatelessWidget {
           controller: controller,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
-            hintText: 'Type your answer here...',
+            hintText: 'Escreva sua resposta aqui...',
           ),
           maxLines: 5,
           onChanged: onTextChanged,
@@ -102,7 +102,7 @@ class QuestionWidget extends StatelessWidget {
           child: ElevatedButton.icon(
             onPressed: onTextSubmitted,
             icon: const Icon(Icons.check),
-            label: const Text('Submit Answer'),
+            label: const Text('Enviar resposta'),
           ),
         ),
       ],
@@ -116,7 +116,7 @@ class QuestionWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Select your answer:',
+          'Selecione sua resposta:',
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -171,11 +171,11 @@ class QuestionWidget extends StatelessWidget {
   String _getQuestionTypeDisplay(QuestionType type) {
     switch (type) {
       case QuestionType.multipleChoice:
-        return 'Multiple Choice';
+        return 'Múltipla Escolha';
       case QuestionType.trueFalse:
-        return 'True/False';
+        return 'Verdadeiro/False';
       case QuestionType.shortAnswer:
-        return 'Short Answer';
+        return 'Aberta';
     }
   }
 }

@@ -22,7 +22,7 @@ class QuestionStatsWidget extends StatelessWidget {
         if (difficultQuestions.isNotEmpty) ...[
           _buildSectionHeader(
             context,
-            'Most Difficult Questions',
+            'Questões mais difíceis',
             Icons.trending_down,
             Colors.red,
           ),
@@ -36,7 +36,7 @@ class QuestionStatsWidget extends StatelessWidget {
         if (correctQuestions.isNotEmpty) ...[
           _buildSectionHeader(
             context,
-            'Most Correct Questions',
+            'Questões mais assertivas',
             Icons.trending_up,
             Colors.green,
           ),
@@ -49,7 +49,7 @@ class QuestionStatsWidget extends StatelessWidget {
         // All Questions Performance
         _buildSectionHeader(
           context,
-          'All Questions Performance',
+          'Desempenho de todas as questões',
           Icons.quiz,
           Colors.blue,
         ),
@@ -99,7 +99,7 @@ class QuestionStatsWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Correct: ${question.correctResponses}/${question.totalResponses}',
+                  'Correta: ${question.correctResponses}/${question.totalResponses}',
                   style: TextStyle(color: textColor),
                 ),
                 Text(
@@ -169,11 +169,11 @@ class QuestionStatsWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Responses: ${question.totalResponses}',
+                        'Resposta: ${question.totalResponses}',
                         style: const TextStyle(color: Colors.grey),
                       ),
                       Text(
-                        'Correct: ${question.correctResponses}',
+                        'Correta: ${question.correctResponses}',
                         style: const TextStyle(color: Colors.grey),
                       ),
                     ],
@@ -194,13 +194,13 @@ class QuestionStatsWidget extends StatelessWidget {
                 children: [
                   if (question.isMostDifficult)
                     Chip(
-                      label: const Text('Most Difficult'),
+                      label: const Text('Mais difícil'),
                       backgroundColor: Colors.red[100],
                       avatar: const Icon(Icons.trending_down, size: 16, color: Colors.red),
                     ),
                   if (question.isMostCorrect)
                     Chip(
-                      label: const Text('Most Correct'),
+                      label: const Text('Mais assertiva'),
                       backgroundColor: Colors.green[100],
                       avatar: const Icon(Icons.trending_up, size: 16, color: Colors.green),
                     ),
