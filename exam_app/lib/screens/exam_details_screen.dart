@@ -148,27 +148,22 @@ class _ExamDetailsScreenState extends State<ExamDetailsScreen> {
       child: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          // Exam Info Card
           _buildExamInfoCard(),
 
           const SizedBox(height: 16),
 
-          // Status Card
           _buildStatusCard(),
 
           const SizedBox(height: 16),
 
-          // Quick Stats Card
           _buildQuickStatsCard(),
 
           const SizedBox(height: 16),
 
-          // Questions Section
           _buildQuestionsSection(),
 
           const SizedBox(height: 16),
 
-          // Actions Section
           _buildActionsSection(),
         ],
       ),

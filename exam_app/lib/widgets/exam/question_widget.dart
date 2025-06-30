@@ -26,7 +26,6 @@ class QuestionWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Question header
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
@@ -64,7 +63,6 @@ class QuestionWidget extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // Answer section
           if (question.type == QuestionType.shortAnswer)
             _buildShortAnswerSection(context)
           else

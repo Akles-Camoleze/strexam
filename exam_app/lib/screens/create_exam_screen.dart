@@ -320,7 +320,7 @@ class _CreateExamScreenState extends State<CreateExamScreen> {
               }).toList(),
               if (question.type == 'MULTIPLE_CHOICE')
                 TextButton.icon(
-                  onPressed: () => question.addAnswer(),
+                  onPressed: () => setState(() => question.addAnswer()),
                   icon: const Icon(Icons.add),
                   label: const Text('Nova Opção'),
                 ),
@@ -452,14 +452,12 @@ class QuestionData {
   }
 
   void setupAnswers() {
-    // Clear existing answers
     for (var answer in answers) {
       answer.dispose();
     }
     answers.clear();
     correctAnswerIndex = -1;
 
-    // Setup answers based on type
     switch (type) {
       case 'MULTIPLE_CHOICE':
         answers = [
