@@ -20,7 +20,7 @@ public class StreamController {
     private final ExamService examService;
     
     @GetMapping(value = "/exams/{examId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ExamEvent> streamExamEvents(@PathVariable("examId") Long examId, @RequestParam Long userId) {
+    public Flux<ExamEvent> streamExamEvents(@PathVariable("examId") Long examId, @RequestParam("userId") Long userId) {
         log.info("User {} connecting to exam {} stream", userId, examId);
         
         return examService.getExamEventStream(examId)
@@ -34,7 +34,6 @@ public class StreamController {
                     log.error("Stream error for exam {} user {}: {}", examId, userId, error.getMessage());
                     return Flux.empty();
                 })
-                // Send keep-alive events every 30 seconds
                 .mergeWith(Flux.interval(Duration.ofSeconds(30))
                         .map(tick -> ExamEvent.builder()
                                 .type(ExamEvent.ExamEventType.TIME_WARNING)
@@ -44,7 +43,7 @@ public class StreamController {
     }
     
     @GetMapping(value = "/exams", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ExamEvent> streamAllExamEvents(@RequestParam Long userId) {
+    public Flux<ExamEvent> streamAllExamEvents(@RequestParam("userId") Long userId) {
         log.info("User {} connecting to global exam stream", userId);
         
         return examService.getExamEventStream()

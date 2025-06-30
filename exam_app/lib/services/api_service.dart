@@ -125,58 +125,6 @@ class ApiService {
     }
   }
 
-  // Statistics endpoints
-  Future<StatisticsResponse> getExamStatistics(int examId) async {
-    try {
-      final response = await _dio.get('/exams/$examId/statistics');
-      return StatisticsResponse.fromJson(response.data);
-    } catch (e) {
-      throw _handleError(e);
-    }
-  }
-
-  Future<List<QuestionStatistics>> getMostDifficultQuestions(int examId, {int limit = 5}) async {
-    try {
-      final response = await _dio.get('/exams/$examId/statistics/difficult-questions?limit=$limit');
-      return (response.data as List)
-          .map((json) => QuestionStatistics.fromJson(json))
-          .toList();
-    } catch (e) {
-      throw _handleError(e);
-    }
-  }
-
-  Future<List<QuestionStatistics>> getMostCorrectQuestions(int examId, {int limit = 5}) async {
-    try {
-      final response = await _dio.get('/exams/$examId/statistics/correct-questions?limit=$limit');
-      return (response.data as List)
-          .map((json) => QuestionStatistics.fromJson(json))
-          .toList();
-    } catch (e) {
-      throw _handleError(e);
-    }
-  }
-
-  Future<List<UserStatistics>> getTopPerformers(int examId, {int limit = 10}) async {
-    try {
-      final response = await _dio.get('/exams/$examId/statistics/top-performers?limit=$limit');
-      return (response.data as List)
-          .map((json) => UserStatistics.fromJson(json))
-          .toList();
-    } catch (e) {
-      throw _handleError(e);
-    }
-  }
-
-  Future<double> getExamProgress(int sessionId) async {
-    try {
-      final response = await _dio.get('/exams/sessions/$sessionId/progress');
-      return (response.data as num).toDouble();
-    } catch (e) {
-      throw _handleError(e);
-    }
-  }
-
   Exception _handleError(dynamic error) {
     if (error is DioException) {
       switch (error.type) {

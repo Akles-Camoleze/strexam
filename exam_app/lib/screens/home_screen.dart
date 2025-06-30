@@ -383,7 +383,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Logout'),
-        content: const Text('Tem certeza de que deseja sair??'),
+        content: const Text('Tem certeza de que deseja sair?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),

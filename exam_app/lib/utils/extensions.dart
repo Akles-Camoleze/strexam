@@ -57,4 +57,23 @@ extension ListExtensions<T> on List<T> {
     }
     return result;
   }
+
+  void insertSorted(T item, int Function(T a, T b) compare) {
+    int insertIndex = indexWhere((element) => compare(item, element) < 0);
+
+    if (insertIndex == -1) {
+      add(item);
+    } else {
+      insert(insertIndex, item);
+    }
+  }
+
+  void updateOrInsertSorted(
+      T item,
+      bool Function(T existing) predicate,
+      int Function(T a, T b) compare,
+      ) {
+    removeWhere(predicate);
+    insertSorted(item, compare);
+  }
 }

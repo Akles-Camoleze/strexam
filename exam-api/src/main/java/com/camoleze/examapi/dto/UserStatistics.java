@@ -16,6 +16,8 @@ public class UserStatistics {
     private Integer correctAnswers;
     private Double currentPercentage;
     private String status; // STARTED, IN_PROGRESS, COMPLETED
+    private Integer totalScore;
+    private Integer maxScore;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime startedAt;

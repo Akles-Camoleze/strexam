@@ -1,46 +1,59 @@
+import 'dart:async';
+
+import 'package:exam_app/core/types/limited_sorted_list.dart';
+import 'package:exam_app/services/statistics_service.dart';
 import 'package:flutter/foundation.dart';
+
 import '../models/statistics.dart';
-import '../services/api_service.dart';
 
 class StatisticsProvider with ChangeNotifier {
-  final ApiService _apiService = ApiService();
+  final StatisticsService _apiService = StatisticsService();
 
   StatisticsResponse? _examStatistics;
-  List<QuestionStatistics> _difficultQuestions = [];
-  List<QuestionStatistics> _correctQuestions = [];
-  List<UserStatistics> _topPerformers = [];
+
+  final LimitedSortedList<QuestionStatistics> _difficultQuestions = LimitedSortedList(
+    maxSize: 5,
+    comparator: (a, b) => a.correctPercentage.compareTo(b.correctPercentage)
+  );
+
+  final LimitedSortedList<QuestionStatistics> _correctQuestions = LimitedSortedList(
+      maxSize: 5,
+      comparator: (a, b) => a.correctPercentage.compareTo(b.correctPercentage)
+  );
+
+  final LimitedSortedList<UserStatistics> _topPerformers = LimitedSortedList(
+      maxSize: 10,
+      comparator: (a, b) => b.currentPercentage.compareTo(a.currentPercentage)
+  );
 
   bool _isLoading = false;
   String? _error;
 
-  // Getters
+  StreamSubscription<StatisticsResponse>? _statisticsSubscription;
+  StreamSubscription<QuestionStatistics>? _difficultQuestionsSubscription;
+  StreamSubscription<QuestionStatistics>? _correctQuestionsSubscription;
+  StreamSubscription<UserStatistics>? _topPerformersSubscription;
+
   StatisticsResponse? get examStatistics => _examStatistics;
-  List<QuestionStatistics> get difficultQuestions => _difficultQuestions;
-  List<QuestionStatistics> get correctQuestions => _correctQuestions;
-  List<UserStatistics> get topPerformers => _topPerformers;
+
+  List<QuestionStatistics> get difficultQuestions => _difficultQuestions.items;
+
+  List<QuestionStatistics> get correctQuestions => _correctQuestions.items;
+
+  List<UserStatistics> get topPerformers => _topPerformers.items;
+
   bool get isLoading => _isLoading;
+
   String? get error => _error;
 
-  // Load all statistics for an exam
   Future<void> loadExamStatistics(int examId) async {
     _setLoading(true);
     _clearError();
 
     try {
-      // Load main statistics
-      _examStatistics = await _apiService.getExamStatistics(examId);
-
-      // Load additional statistics in parallel
-      final futures = await Future.wait([
-        _apiService.getMostDifficultQuestions(examId, limit: 5),
-        _apiService.getMostCorrectQuestions(examId, limit: 5),
-        _apiService.getTopPerformers(examId, limit: 10),
-      ]);
-
-      _difficultQuestions = futures[0] as List<QuestionStatistics>;
-      _correctQuestions = futures[1] as List<QuestionStatistics>;
-      _topPerformers = futures[2] as List<UserStatistics>;
-
+      _stopStreams();
+      _clearLists();
+      _startStreams(examId);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -48,60 +61,66 @@ class StatisticsProvider with ChangeNotifier {
     }
   }
 
-  // Load specific statistics
-  Future<void> loadDifficultQuestions(int examId, {int limit = 5}) async {
-    try {
-      _difficultQuestions = await _apiService.getMostDifficultQuestions(examId, limit: limit);
-      notifyListeners();
-    } catch (e) {
-      _setError(e.toString());
-    }
+  void _startStreams(int examId) {
+    _statisticsSubscription =
+        _apiService.watchExamStatistics(examId).listen((statistics) {
+            _examStatistics = statistics;
+            notifyListeners();
+          },
+          onError: (error) => _setError('Statistics: $error')
+        );
+
+    _difficultQuestionsSubscription =
+        _apiService.watchDifficultQuestions(examId, limit: 5).listen((question) {
+          print('bosta');
+            _difficultQuestions.updateOrInsert(
+                question,
+                (q) => q.questionId == question.questionId
+            );
+            notifyListeners();
+          },
+          onError: (error) => _setError('Difficult: $error'),
+        );
+
+    _correctQuestionsSubscription =
+        _apiService.watchMostCorrectQuestions(examId, limit: 5).listen((question) {
+          _correctQuestions.updateOrInsert(
+              question,
+              (q) => q.questionId == question.questionId
+          );
+          notifyListeners();
+        },
+          onError: (error) => _setError('Correct: $error'),
+        );
+
+    _topPerformersSubscription =
+        _apiService.watchTopPerformers(examId, limit: 10).listen((user) {
+          _topPerformers.updateOrInsert(user, (u) => u.userId == user.userId);
+          notifyListeners();
+        },
+          onError: (error) => _setError('Top performers: $error'),
+        );
   }
 
-  Future<void> loadCorrectQuestions(int examId, {int limit = 5}) async {
-    try {
-      _correctQuestions = await _apiService.getMostCorrectQuestions(examId, limit: limit);
-      notifyListeners();
-    } catch (e) {
-      _setError(e.toString());
-    }
+  void _stopStreams() {
+    _statisticsSubscription?.cancel();
+    _difficultQuestionsSubscription?.cancel();
+    _correctQuestionsSubscription?.cancel();
+    _topPerformersSubscription?.cancel();
   }
 
-  Future<void> loadTopPerformers(int examId, {int limit = 10}) async {
-    try {
-      _topPerformers = await _apiService.getTopPerformers(examId, limit: limit);
-      notifyListeners();
-    } catch (e) {
-      _setError(e.toString());
-    }
-  }
-
-  // Get progress for a specific session
-  Future<double> getSessionProgress(int sessionId) async {
-    try {
-      return await _apiService.getExamProgress(sessionId);
-    } catch (e) {
-      _setError(e.toString());
-      return 0.0;
-    }
-  }
-
-  // Refresh statistics
-  Future<void> refreshStatistics(int examId) async {
-    await loadExamStatistics(examId);
-  }
-
-  // Clear statistics
-  void clearStatistics() {
-    _examStatistics = null;
+  void _clearLists() {
     _difficultQuestions.clear();
     _correctQuestions.clear();
     _topPerformers.clear();
-    _clearError();
-    notifyListeners();
   }
 
-  // Utility methods
+  @override
+  void dispose() {
+    _stopStreams();
+    super.dispose();
+  }
+
   void _setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
@@ -114,58 +133,62 @@ class StatisticsProvider with ChangeNotifier {
 
   void _clearError() {
     _error = null;
+  }
+
+  void clearStatistics() {
+    _stopStreams();
+    _clearLists();
+    _clearError();
     notifyListeners();
   }
 
-  // Get statistics summary
   Map<String, dynamic> getStatisticsSummary() {
-    if (_examStatistics == null) return {};
-
-    final stats = _examStatistics!.examStatistics;
-
     return {
-      'totalParticipants': stats.totalParticipants,
-      'completionRate': '${stats.completionRate.toStringAsFixed(1)}%',
-      'averageScore': '${stats.averageScore.toStringAsFixed(1)}%',
-      'totalQuestions': stats.totalQuestions,
+      'totalDifficultQuestions': _difficultQuestions.length,
+      'totalCorrectQuestions': _correctQuestions.length,
+      'totalTopPerformers': _topPerformers.length,
       'mostDifficultQuestion': _difficultQuestions.isNotEmpty
           ? _difficultQuestions.first.questionText
           : 'N/A',
       'bestPerformer': _topPerformers.isNotEmpty
           ? _topPerformers.first.fullName
           : 'N/A',
+      'averageTopPerformerScore': _topPerformers.isNotEmpty
+          ? '${(_topPerformers.map((u) => u.currentPercentage).reduce((a, b) => a + b) / _topPerformers.length).toStringAsFixed(1)}%'
+          : 'N/A',
     };
   }
 
-  // Get question performance data for charts
   List<Map<String, dynamic>> getQuestionPerformanceData() {
     if (_examStatistics == null) return [];
 
-    return _examStatistics!.questionStatistics.map((question) => {
+    return _examStatistics!.questionStatistics
+        .map((question) => {
       'questionId': question.questionId,
       'questionText': question.questionText.length > 30
           ? '${question.questionText.substring(0, 30)}...'
           : question.questionText,
       'correctPercentage': question.correctPercentage,
       'totalResponses': question.totalResponses,
-    }).toList();
+    })
+        .toList();
   }
 
-  // Get user performance data for charts
   List<Map<String, dynamic>> getUserPerformanceData() {
     if (_examStatistics == null) return [];
 
-    return _examStatistics!.userStatistics.map((user) => {
+    return _examStatistics!.userStatistics
+        .map((user) => {
       'userId': user.userId,
       'username': user.username,
       'fullName': user.fullName,
       'percentage': user.currentPercentage,
       'questionsAnswered': user.questionsAnswered,
       'status': user.status,
-    }).toList();
+    })
+        .toList();
   }
 
-  // Calculate completion rate by status
   Map<String, int> getCompletionByStatus() {
     if (_examStatistics == null) return {};
 
@@ -178,7 +201,6 @@ class StatisticsProvider with ChangeNotifier {
     return statusCounts;
   }
 
-  // Get performance distribution
   Map<String, int> getPerformanceDistribution() {
     if (_examStatistics == null) return {};
 
@@ -194,13 +216,15 @@ class StatisticsProvider with ChangeNotifier {
       final percentage = user.currentPercentage;
 
       if (percentage >= 90) {
-        distribution['Excelente (90-100%)'] = distribution['Excelente (90-100%)']! + 1;
+        distribution['Excelente (90-100%)'] =
+            distribution['Excelente (90-100%)']! + 1;
       } else if (percentage >= 80) {
         distribution['Bom (80-89%)'] = distribution['Bom (80-89%)']! + 1;
       } else if (percentage >= 70) {
         distribution['Média (70-79%)'] = distribution['Média (70-79%)']! + 1;
       } else if (percentage >= 60) {
-        distribution['Abaixo da Média (60-69%)'] = distribution['Abaixo da Média (60-69%)']! + 1;
+        distribution['Abaixo da Média (60-69%)'] =
+            distribution['Abaixo da Média (60-69%)']! + 1;
       } else {
         distribution['Ruim (0-59%)'] = distribution['Ruim (0-59%)']! + 1;
       }

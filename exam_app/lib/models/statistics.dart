@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'statistics.g.dart';
@@ -27,7 +28,7 @@ class ExamStatistics {
 }
 
 @JsonSerializable()
-class QuestionStatistics {
+class QuestionStatistics extends Equatable {
   final int questionId;
   final String questionText;
   final int totalResponses;
@@ -36,7 +37,7 @@ class QuestionStatistics {
   final bool isMostDifficult;
   final bool isMostCorrect;
 
-  QuestionStatistics({
+  const QuestionStatistics({
     required this.questionId,
     required this.questionText,
     required this.totalResponses,
@@ -45,6 +46,17 @@ class QuestionStatistics {
     required this.isMostDifficult,
     required this.isMostCorrect,
   });
+
+  @override
+  List<Object?> get props => [
+    questionId,
+    questionText,
+    totalResponses,
+    correctResponses,
+    correctPercentage,
+    isMostDifficult,
+    isMostCorrect,
+  ];
 
   factory QuestionStatistics.fromJson(Map<String, dynamic> json) => _$QuestionStatisticsFromJson(json);
   Map<String, dynamic> toJson() => _$QuestionStatisticsToJson(this);

@@ -6,6 +6,7 @@ import com.camoleze.examapi.service.StatisticsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -66,38 +67,56 @@ public class ExamController {
         log.info("Completing exam session {}", sessionId);
         return examService.completeExam(sessionId);
     }
-    
-    @GetMapping("/{examId}/statistics")
-    public Mono<StatisticsResponse> getExamStatistics(@PathVariable("examId") Long examId) {
-        log.info("Getting statistics for exam {}", examId);
-        return statisticsService.getStatistics(examId);
+
+    @GetMapping(value = "/{examId}/statistics", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<StatisticsResponse> getExamStatistics(@PathVariable("examId") Long examId) {
+        log.info("Starting SSE stream for exam statistics {}", examId);
+
+        return Flux.merge(
+                statisticsService.getStatistics(examId),
+                examService.getExamEventStream(examId)
+                        .filter(event -> event.getType() == ExamEvent.ExamEventType.STATISTICS_UPDATED)
+                        .flatMap(event -> statisticsService.getStatistics(examId))
+        );
     }
-    
-    @GetMapping("/{examId}/statistics/difficult-questions")
+
+    @GetMapping(value = "/{examId}/statistics/difficult-questions", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<QuestionStatistics> getMostDifficultQuestions(
             @PathVariable("examId") Long examId,
             @RequestParam(defaultValue = "5", name = "limit") Integer limit
     ) {
-        log.info("Getting most difficult questions for exam {}", examId);
-        return statisticsService.getMostDifficultQuestions(examId, limit);
+        return Flux.merge(
+                statisticsService.getMostDifficultQuestions(examId, limit),
+                examService.getExamEventStream(examId)
+                        .filter(event -> event.getType() == ExamEvent.ExamEventType.STATISTICS_UPDATED)
+                        .flatMap(event -> statisticsService.getMostDifficultQuestions(examId, limit))
+        );
     }
-    
-    @GetMapping("/{examId}/statistics/correct-questions")
+
+    @GetMapping(value = "/{examId}/statistics/correct-questions", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<QuestionStatistics> getMostCorrectQuestions(
             @PathVariable("examId") Long examId,
             @RequestParam(defaultValue = "5", name = "limit") Integer limit
     ) {
-        log.info("Getting most correct questions for exam {}", examId);
-        return statisticsService.getMostCorrectQuestions(examId, limit);
+        return Flux.merge(
+                statisticsService.getMostCorrectQuestions(examId, limit),
+                examService.getExamEventStream(examId)
+                        .filter(event -> event.getType() == ExamEvent.ExamEventType.STATISTICS_UPDATED)
+                        .flatMap(event -> statisticsService.getMostCorrectQuestions(examId, limit))
+        );
     }
-    
-    @GetMapping("/{examId}/statistics/top-performers")
+
+    @GetMapping(value = "/{examId}/statistics/top-performers", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<UserStatistics> getTopPerformers(
             @PathVariable("examId") Long examId,
             @RequestParam(defaultValue = "10", name = "limit") Integer limit
     ) {
-        log.info("Getting top performers for exam {}", examId);
-        return statisticsService.getTopPerformers(examId, limit);
+        return Flux.merge(
+                statisticsService.getTopPerformers(examId, limit),
+                examService.getExamEventStream(examId)
+                        .filter(event -> event.getType() == ExamEvent.ExamEventType.STATISTICS_UPDATED)
+                        .flatMap(event -> statisticsService.getTopPerformers(examId, limit))
+        );
     }
     
     @GetMapping("/sessions/{sessionId}/progress")
