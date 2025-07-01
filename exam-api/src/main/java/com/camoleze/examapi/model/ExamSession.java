@@ -11,6 +11,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
 @Data
 @Builder
@@ -37,6 +39,14 @@ public class ExamSession {
     private LocalDateTime updatedAt;
     
     public enum SessionStatus {
-        STARTED, IN_PROGRESS, COMPLETED, ABANDONED
+        STARTED, IN_PROGRESS, COMPLETED, ABANDONED;
+
+        public static List<SessionStatus> continueStatus() {
+            return List.of(STARTED, IN_PROGRESS);
+        }
+
+        public boolean allowContinue() {
+            return continueStatus().contains(this);
+        }
     }
 }

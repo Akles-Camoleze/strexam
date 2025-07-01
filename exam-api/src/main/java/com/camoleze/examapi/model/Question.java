@@ -22,6 +22,10 @@ public class Question {
     private Integer points;
     
     public enum QuestionType {
-        MULTIPLE_CHOICE, TRUE_FALSE, SHORT_ANSWER
+        MULTIPLE_CHOICE, TRUE_FALSE, SHORT_ANSWER;
+
+        public boolean isChoiceAnswer() {
+            return QuestionType.MULTIPLE_CHOICE.equals(this) || QuestionType.TRUE_FALSE.equals(this);
+        }
     }
 }

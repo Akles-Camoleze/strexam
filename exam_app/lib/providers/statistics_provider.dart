@@ -18,7 +18,7 @@ class StatisticsProvider with ChangeNotifier {
 
   final LimitedSortedList<QuestionStatistics> _correctQuestions = LimitedSortedList(
       maxSize: 5,
-      comparator: (a, b) => a.correctPercentage.compareTo(b.correctPercentage)
+      comparator: (a, b) => b.correctPercentage.compareTo(a.correctPercentage)
   );
 
   final LimitedSortedList<UserStatistics> _topPerformers = LimitedSortedList(

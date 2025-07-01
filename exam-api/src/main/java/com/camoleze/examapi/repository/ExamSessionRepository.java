@@ -7,9 +7,12 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @Repository
 public interface ExamSessionRepository extends R2dbcRepository<ExamSession, Long> {
     Mono<ExamSession> findByExamIdAndUserId(Long examId, Long userId);
+    Flux<ExamSession> findByExamIdAndUserIdOrderByCreatedAtDesc(Long examId, Long userId);
     Flux<ExamSession> findByExamId(Long examId);
     Flux<ExamSession> findByUserId(Long userId);
     

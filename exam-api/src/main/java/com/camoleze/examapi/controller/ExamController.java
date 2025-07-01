@@ -57,8 +57,7 @@ public class ExamController {
     
     @PostMapping("/answer")
     public Mono<Void> submitAnswer(@Valid @RequestBody AnswerSubmissionRequest request) {
-        log.info("Submitting answer for session {} question {}", 
-                request.getSessionId(), request.getQuestionId());
+        log.info("Submitting answer for session {} question {}", request.getSessionId(), request.getQuestionId());
         return examService.submitAnswer(request);
     }
     
@@ -77,7 +76,6 @@ public class ExamController {
                 examService.getExamEventStream(examId)
                         .filter(event -> event.getType() == ExamEvent.ExamEventType.STATISTICS_UPDATED)
                         .flatMap(event -> statisticsService.getStatistics(examId))
-                        .distinctUntilChanged()
         );
     }
 
@@ -91,7 +89,6 @@ public class ExamController {
                 examService.getExamEventStream(examId)
                         .filter(event -> event.getType() == ExamEvent.ExamEventType.STATISTICS_UPDATED)
                         .flatMap(event -> statisticsService.getMostDifficultQuestions(examId, limit))
-                        .distinctUntilChanged()
         );
     }
 
@@ -105,7 +102,6 @@ public class ExamController {
                 examService.getExamEventStream(examId)
                         .filter(event -> event.getType() == ExamEvent.ExamEventType.STATISTICS_UPDATED)
                         .flatMap(event -> statisticsService.getMostCorrectQuestions(examId, limit))
-                        .distinctUntilChanged()
         );
     }
 
@@ -119,7 +115,6 @@ public class ExamController {
                 examService.getExamEventStream(examId)
                         .filter(event -> event.getType() == ExamEvent.ExamEventType.STATISTICS_UPDATED)
                         .flatMap(event -> statisticsService.getTopPerformers(examId, limit))
-                        .distinctUntilChanged()
         );
     }
     

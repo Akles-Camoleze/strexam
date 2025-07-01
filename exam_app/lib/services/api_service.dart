@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import '../config/app_config.dart';
+import '../core/exceptions/server_exception.dart';
 import '../models/user.dart';
 import '../models/exam.dart';
 import '../models/exam_session.dart';
@@ -60,7 +61,6 @@ class ApiService {
     }
   }
 
-  // Exam endpoints
   Future<Exam> createExam(ExamCreateRequest request) async {
     try {
       final response = await _dio.post('/exams', data: request.toJson());
@@ -125,22 +125,21 @@ class ApiService {
     }
   }
 
-  Exception _handleError(dynamic error) {
+  ServerException _handleError(dynamic error) {
     if (error is DioException) {
       switch (error.type) {
         case DioExceptionType.connectionTimeout:
         case DioExceptionType.receiveTimeout:
-          return Exception('Connection timeout. Please check your internet connection.');
+          return ServerException('Connection timeout. Please check your internet connection.');
         case DioExceptionType.badResponse:
-          final statusCode = error.response?.statusCode;
           final message = error.response?.data?['error'] ?? 'Server error occurred';
-          return Exception('Server error ($statusCode): $message');
+          return ServerException(message);
         case DioExceptionType.cancel:
-          return Exception('Request was cancelled');
+          return ServerException('Request was cancelled');
         default:
-          return Exception('Network error: ${error.message}');
+          return ServerException('Network error: ${error.message}');
       }
     }
-    return Exception('Unexpected error: $error');
+    return ServerException('Unexpected error: $error');
   }
 }

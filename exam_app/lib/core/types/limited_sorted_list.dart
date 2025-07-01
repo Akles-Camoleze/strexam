@@ -4,13 +4,18 @@ class LimitedSortedList<T> {
   final List<T> _items = [];
   final int maxSize;
   final int Function(T a, T b) _comparator;
-  
-  LimitedSortedList({required this.maxSize, required int Function(T a, T b) comparator})
+  final bool reversed;
+
+  LimitedSortedList({
+    required this.maxSize,
+    required int Function(T a, T b) comparator,
+    this.reversed = false
+  })
       : _comparator = comparator;
   
   void updateOrInsert(T item, bool Function(T) predicate) {
     _items.removeWhere(predicate);
-    _items.insertSorted(item, _comparator);
+    _items.insertSorted(item, _comparator, reversed);
     
     if (_items.length > maxSize) {
       _items.removeRange(maxSize, _items.length);

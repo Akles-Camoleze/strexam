@@ -58,8 +58,10 @@ extension ListExtensions<T> on List<T> {
     return result;
   }
 
-  void insertSorted(T item, int Function(T a, T b) compare) {
-    int insertIndex = indexWhere((element) => compare(item, element) < 0);
+  void insertSorted(T item, int Function(T a, T b) compare, [bool reversed = false]) {
+    int insertIndex = indexWhere((element) =>
+    reversed ? compare(item, element) > 0 : compare(item, element) < 0
+    );
 
     if (insertIndex == -1) {
       add(item);

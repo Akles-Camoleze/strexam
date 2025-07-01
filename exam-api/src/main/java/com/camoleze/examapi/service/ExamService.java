@@ -109,22 +109,34 @@ public class ExamService {
 
     public Mono<ExamSessionResponse> joinExam(ExamJoinRequest request) {
         return examRepository.findByJoinCode(request.getJoinCode())
-                .switchIfEmpty(Mono.error(new RuntimeException("Invalid join code")))
+                .switchIfEmpty(Mono.error(new RuntimeException("Código de inscrição inválido")))
                 .filter(exam -> exam.getStatus() == Exam.ExamStatus.ACTIVE)
-                .switchIfEmpty(Mono.error(new RuntimeException("Exam is not active")))
-                .flatMap(exam -> createOrGetSession(exam, request.getUserId()))
-                .doOnSuccess(session -> broadcastEvent(ExamEvent.builder()
-                        .type(ExamEvent.ExamEventType.USER_JOINED)
-                        .examId(session.getExamId())
-                        .userId(session.getUserId())
-                        .timestamp(LocalDateTime.now())
-                        .build()));
-    }
+                .switchIfEmpty(Mono.error(new RuntimeException("O exame não está ativo")))
+                .flatMap(exam -> examSessionRepository.findByExamIdAndUserIdOrderByCreatedAtDesc(exam.getId(), request.getUserId())
+                        .next()
+                        .flatMap(latestSession -> {
+                            if (latestSession.getStatus().allowContinue()) {
+                                return Mono.just(latestSession);
+                            }
 
-    private Mono<ExamSessionResponse> createOrGetSession(Exam exam, Long userId) {
-        return examSessionRepository.findByExamIdAndUserId(exam.getId(), userId)
-                .switchIfEmpty(createNewSession(exam, userId))
-                .map(ExamSessionResponse::fromEntity);
+                            if (Boolean.TRUE.equals(exam.getAllowRetake())) {
+                                return createNewSession(exam, request.getUserId());
+                            } else {
+                                return Mono.error(new RuntimeException("Sessão finalizada e retomadas não são permitidas"));
+                            }
+                        })
+                        .switchIfEmpty(
+                                createNewSession(exam, request.getUserId())
+                        )
+                        .map(ExamSessionResponse::fromEntity)
+                        .doOnSuccess(session -> broadcastEvent(ExamEvent.builder()
+                                .type(ExamEvent.ExamEventType.USER_JOINED)
+                                .examId(session.getExamId())
+                                .userId(session.getUserId())
+                                .timestamp(LocalDateTime.now())
+                                .build())
+                        )
+                );
     }
 
     private Mono<ExamSession> createNewSession(Exam exam, Long userId) {
@@ -169,62 +181,76 @@ public class ExamService {
     private Mono<UserResponse> processAnswerSubmission(ExamSession session, AnswerSubmissionRequest request) {
         return questionRepository.findById(request.getQuestionId())
                 .flatMap(question -> {
-                    if (question.getType() == Question.QuestionType.MULTIPLE_CHOICE) {
-                        return processMultipleChoiceAnswer(session, question, request);
+                    if (question.getType().isChoiceAnswer()) {
+                        return processChoiceAnswer(session, question, request);
                     } else {
                         return processShortAnswer(session, question, request);
                     }
-                })
-                .flatMap(this::updateSessionScore);
+                });
     }
 
-    private Mono<UserResponse> processMultipleChoiceAnswer(ExamSession session, Question question, AnswerSubmissionRequest request) {
+    private Mono<UserResponse> processChoiceAnswer(ExamSession session, Question question, AnswerSubmissionRequest request) {
         return answerRepository.findById(request.getAnswerId())
-                .flatMap(answer -> {
-                    UserResponse userResponse = UserResponse.builder()
-                            .sessionId(session.getId())
-                            .questionId(question.getId())
-                            .answerId(answer.getId())
-                            .isCorrect(answer.getIsCorrect())
-                            .pointsEarned(answer.getIsCorrect() ? question.getPoints() : 0)
-                            .build();
+                .flatMap(answer -> userResponseRepository.findBySessionIdAndQuestionId(session.getId(), question.getId())
+                        .flatMap(existing -> {
+                            int oldPoints = existing.getPointsEarned();
 
-                    return userResponseRepository.save(userResponse);
-                });
+                            existing.setAnswerId(answer.getId());
+                            existing.setIsCorrect(answer.getIsCorrect());
+                            existing.setPointsEarned(answer.getIsCorrect() ? question.getPoints() : 0);
+
+                            int newPoints = existing.getPointsEarned();
+
+                            return userResponseRepository.save(existing)
+                                    .flatMap(savedResponse -> updateSessionScore(session, newPoints - oldPoints)
+                                            .thenReturn(savedResponse)
+                                    );
+                        })
+                        .switchIfEmpty(Mono.defer(() -> {
+                            UserResponse newResponse = UserResponse.builder()
+                                    .sessionId(session.getId())
+                                    .questionId(question.getId())
+                                    .answerId(answer.getId())
+                                    .isCorrect(answer.getIsCorrect())
+                                    .pointsEarned(answer.getIsCorrect() ? question.getPoints() : 0)
+                                    .build();
+
+                            return userResponseRepository.save(newResponse)
+                                    .flatMap(savedResponse -> updateSessionScore(session, savedResponse.getPointsEarned()))
+                                    .thenReturn(newResponse);
+                        }))
+                );
+
     }
 
     private Mono<UserResponse> processShortAnswer(ExamSession session, Question question, AnswerSubmissionRequest request) {
-        UserResponse userResponse = UserResponse.builder()
-                .sessionId(session.getId())
-                .questionId(question.getId())
-                .responseText(request.getResponseText())
-                .isCorrect(false)
-                .pointsEarned(0)
-                .build();
-
-        return userResponseRepository.save(userResponse);
+        return userResponseRepository.findBySessionIdAndQuestionId(session.getId(), question.getId())
+                .flatMap(existing -> {
+                    existing.setResponseText(request.getResponseText());
+                    existing.setIsCorrect(false);
+                    existing.setPointsEarned(0);
+                    return userResponseRepository.save(existing);
+                })
+                .switchIfEmpty(
+                        Mono.defer(() -> {
+                            UserResponse newResponse = UserResponse.builder()
+                                    .sessionId(session.getId())
+                                    .questionId(question.getId())
+                                    .responseText(request.getResponseText())
+                                    .isCorrect(false)
+                                    .pointsEarned(0)
+                                    .build();
+                            return userResponseRepository.save(newResponse);
+                        })
+                );
     }
 
-    private Mono<UserResponse> updateSessionScore(UserResponse userResponse) {
-        return examSessionRepository.findById(userResponse.getSessionId())
-                .flatMap(session -> {
-                    int newScore = session.getTotalScore() + userResponse.getPointsEarned();
-                    ExamSession updatedSession = ExamSession.builder()
-                            .id(session.getId())
-                            .examId(session.getExamId())
-                            .userId(session.getUserId())
-                            .status(session.getStatus())
-                            .startedAt(session.getStartedAt())
-                            .completedAt(session.getCompletedAt())
-                            .totalScore(newScore)
-                            .maxScore(session.getMaxScore())
-                            .createdAt(session.getCreatedAt())
-                            .updatedAt(LocalDateTime.now())
-                            .build();
 
-                    return examSessionRepository.save(updatedSession)
-                            .then(Mono.just(userResponse));
-                });
+    private Mono<Void> updateSessionScore(ExamSession session, int pointsDelta) {
+        int newScore = session.getTotalScore() + pointsDelta;
+        session.setTotalScore(newScore);
+        session.setUpdatedAt(LocalDateTime.now());
+        return examSessionRepository.save(session).then();
     }
 
     public Mono<ExamSessionResponse> completeExam(Long sessionId) {
@@ -287,8 +313,7 @@ public class ExamService {
     }
 
     public Flux<ExamEvent> getExamEventStream(Long examId) {
-        return examEventSink.asFlux()
-                .filter(event -> event.getExamId().equals(examId));
+        return examEventSink.asFlux().filter(event -> event.getExamId().equals(examId));
     }
 
     public void broadcastEvent(ExamEvent event) {

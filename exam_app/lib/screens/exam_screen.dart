@@ -19,6 +19,7 @@ class _ExamScreenState extends State<ExamScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final examProvider = Provider.of<ExamProvider>(context, listen: false);
+      examProvider.clearError();
       if (examProvider.currentSession == null || examProvider.currentExam == null) {
         _showNoSessionDialog();
       }
@@ -100,7 +101,6 @@ class _ExamScreenState extends State<ExamScreen> {
 
             return Column(
               children: [
-                // Timer and Progress Bar
                 Container(
                   color: Colors.grey[100],
                   padding: const EdgeInsets.all(16),
@@ -121,7 +121,6 @@ class _ExamScreenState extends State<ExamScreen> {
                   ),
                 ),
 
-                // Question Content
                 Expanded(
                   child: examProvider.currentQuestion == null
                       ? const Center(child: Text('Questão não encotrada'))
@@ -138,23 +137,21 @@ class _ExamScreenState extends State<ExamScreen> {
                   ),
                 ),
 
-                // Navigation Buttons
                 Container(
                   padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black12,
                         blurRadius: 4,
-                        offset: const Offset(0, -2),
+                        offset: Offset(0, -2),
                       ),
                     ],
                   ),
                   child: SafeArea(
                     child: Row(
                       children: [
-                        // Previous Button
                         Expanded(
                           child: ElevatedButton.icon(
                             onPressed: examProvider.currentQuestionIndex > 0
@@ -171,7 +168,6 @@ class _ExamScreenState extends State<ExamScreen> {
 
                         const SizedBox(width: 16),
 
-                        // Question Counter
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -192,7 +188,6 @@ class _ExamScreenState extends State<ExamScreen> {
 
                         const SizedBox(width: 16),
 
-                        // Next/Complete Button
                         Expanded(
                           child: _isLastQuestion(examProvider)
                               ? ElevatedButton.icon(
