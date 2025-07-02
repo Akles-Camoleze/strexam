@@ -43,7 +43,6 @@ class _UserSessionsScreenState extends State<UserSessionsScreen> {
       ),
       body: Consumer<ExamProvider>(
         builder: (context, examProvider, _) {
-          // Filter sessions for this exam
           final sessions = examProvider.userSessions
               .where((session) => session.examId == widget.examId)
               .toList();

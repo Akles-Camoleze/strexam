@@ -16,9 +16,10 @@ public class UserResponseDTO {
     private Boolean isCorrect;
     private Integer pointsEarned;
     private LocalDateTime respondedAt;
-    
+
     // Additional fields for UI display
     private String questionText;
     private String questionType;
     private Integer questionPoints;
+    private String answerText;
 }
