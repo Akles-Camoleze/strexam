@@ -379,4 +379,76 @@ class ExamProvider with ChangeNotifier {
       return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
     }
   }
+
+  // Methods for manual correction of short answers
+  List<ExamSession> _examSessions = [];
+  List<Map<String, dynamic>> _userResponses = [];
+  bool _isLoadingSessions = false;
+  bool _isLoadingResponses = false;
+
+  List<ExamSession> get examSessions => _examSessions;
+  List<Map<String, dynamic>> get userResponses => _userResponses;
+  bool get isLoadingSessions => _isLoadingSessions;
+  bool get isLoadingResponses => _isLoadingResponses;
+
+  Future<void> loadSessionsByExam(int examId) async {
+    _setLoadingSessions(true);
+    _clearError();
+
+    try {
+      _examSessions = await _apiService.getSessionsByExam(examId);
+      notifyListeners();
+    } catch (e) {
+      _setError(e.toString());
+    } finally {
+      _setLoadingSessions(false);
+    }
+  }
+
+  Future<void> loadUserResponsesBySession(int sessionId) async {
+    _setLoadingResponses(true);
+    _clearError();
+
+    try {
+      _userResponses = await _apiService.getUserResponsesBySession(sessionId);
+      notifyListeners();
+    } catch (e) {
+      _setError(e.toString());
+    } finally {
+      _setLoadingResponses(false);
+    }
+  }
+
+  Future<bool> updateShortAnswerCorrection(int responseId, bool isCorrect) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final updatedResponse = await _apiService.updateShortAnswerCorrection(responseId, isCorrect);
+
+      // Update the response in the list
+      final index = _userResponses.indexWhere((response) => response['id'] == responseId);
+      if (index != -1) {
+        _userResponses[index] = updatedResponse;
+      }
+
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _setError(e.toString());
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  void _setLoadingSessions(bool loading) {
+    _isLoadingSessions = loading;
+    notifyListeners();
+  }
+
+  void _setLoadingResponses(bool loading) {
+    _isLoadingResponses = loading;
+    notifyListeners();
+  }
 }

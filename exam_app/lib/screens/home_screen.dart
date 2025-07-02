@@ -7,6 +7,7 @@ import 'create_exam_screen.dart';
 import 'join_exam_screen.dart';
 import 'statistics_screen.dart';
 import 'exam_details_screen.dart';
+import 'sessions_list_screen.dart';
 import '../widgets/common/loading_widget.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -288,6 +289,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
+                const PopupMenuItem(
+                  value: 'sessions',
+                  child: Row(
+                    children: [
+                      Icon(Icons.people, color: Colors.purple),
+                      SizedBox(width: 8),
+                      Text('Sessões e Correções'),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -372,6 +383,17 @@ class _HomeScreenState extends State<HomeScreen> {
           context,
           MaterialPageRoute(
             builder: (context) => ExamDetailsScreen(examId: exam.id),
+          ),
+        );
+        break;
+      case 'sessions':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SessionsListScreen(
+              examId: exam.id,
+              examTitle: exam.title,
+            ),
           ),
         );
         break;

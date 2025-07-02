@@ -125,6 +125,37 @@ class ApiService {
     }
   }
 
+  Future<List<ExamSession>> getSessionsByExam(int examId) async {
+    try {
+      final response = await _dio.get('/exams/$examId/sessions');
+      return (response.data as List)
+          .map((json) => ExamSession.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getUserResponsesBySession(int sessionId) async {
+    try {
+      final response = await _dio.get('/exams/sessions/$sessionId/responses');
+      return (response.data as List)
+          .map((json) => json as Map<String, dynamic>)
+          .toList();
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> updateShortAnswerCorrection(int responseId, bool isCorrect) async {
+    try {
+      final response = await _dio.put('/exams/responses/$responseId/correct?isCorrect=$isCorrect');
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   ServerException _handleError(dynamic error) {
     if (error is DioException) {
       switch (error.type) {

@@ -19,48 +19,48 @@ import jakarta.validation.Valid;
 @Slf4j
 @CrossOrigin(origins = "*")
 public class ExamController {
-    
+
     private final ExamService examService;
     private final StatisticsService statisticsService;
-    
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<ExamResponse> createExam(@Valid @RequestBody ExamCreateRequest request) {
         log.info("Creating exam: {}", request.getTitle());
         return examService.createExam(request);
     }
-    
+
     @GetMapping("/{examId}")
     public Mono<ExamResponse> getExam(@PathVariable("examId") Long examId, @RequestParam("userId") Long userId) {
         log.info("Getting exam {} for user {}", examId, userId);
         return examService.getExam(examId, userId);
     }
-    
+
     @GetMapping("/host/{hostUserId}")
     public Flux<ExamResponse> getExamsByHost(@PathVariable("hostUserId") Long hostUserId) {
         log.info("Getting exams for host {}", hostUserId);
         return examService.getExamsByHost(hostUserId);
     }
-    
+
     @PostMapping("/join")
     public Mono<ExamSessionResponse> joinExam(@Valid @RequestBody ExamJoinRequest request) {
         log.info("User {} joining exam with code {}", request.getUserId(), request.getJoinCode());
         return examService.joinExam(request);
     }
-    
+
     @PutMapping("/{examId}/activate")
     public Mono<ExamResponse> activateExam(@PathVariable("examId") Long examId) {
         log.info("Activating exam {}", examId);
         return examService.activateExam(examId)
                 .map(ExamResponse::fromEntity);
     }
-    
+
     @PostMapping("/answer")
     public Mono<Void> submitAnswer(@Valid @RequestBody AnswerSubmissionRequest request) {
         log.info("Submitting answer for session {} question {}", request.getSessionId(), request.getQuestionId());
         return examService.submitAnswer(request);
     }
-    
+
     @PutMapping("/sessions/{sessionId}/complete")
     public Mono<ExamSessionResponse> completeExam(@PathVariable("sessionId") Long sessionId) {
         log.info("Completing exam session {}", sessionId);
@@ -117,10 +117,30 @@ public class ExamController {
                         .flatMap(event -> statisticsService.getTopPerformers(examId, limit))
         );
     }
-    
+
     @GetMapping("/sessions/{sessionId}/progress")
     public Mono<Double> getExamProgress(@PathVariable("sessionId") Long sessionId) {
         log.info("Getting progress for session {}", sessionId);
         return statisticsService.getExamProgress(sessionId);
+    }
+
+    @GetMapping("/{examId}/sessions")
+    public Flux<ExamSessionResponse> getSessionsByExam(@PathVariable("examId") Long examId) {
+        log.info("Getting sessions for exam {}", examId);
+        return examService.getSessionsByExam(examId);
+    }
+
+    @GetMapping("/sessions/{sessionId}/responses")
+    public Flux<UserResponseDTO> getUserResponsesBySession(@PathVariable("sessionId") Long sessionId) {
+        log.info("Getting user responses for session {}", sessionId);
+        return examService.getUserResponsesBySession(sessionId);
+    }
+
+    @PutMapping("/responses/{responseId}/correct")
+    public Mono<UserResponseDTO> updateShortAnswerCorrection(
+            @PathVariable("responseId") Long responseId,
+            @RequestParam("isCorrect") Boolean isCorrect) {
+        log.info("Updating short answer correction for response {}, isCorrect: {}", responseId, isCorrect);
+        return examService.updateShortAnswerCorrection(responseId, isCorrect);
     }
 }

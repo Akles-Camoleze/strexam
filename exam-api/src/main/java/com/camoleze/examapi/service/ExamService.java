@@ -324,4 +324,65 @@ public class ExamService {
         return examRepository.findByHostUserId(hostUserId)
                 .flatMap(exam -> buildExamResponse(exam, true));
     }
+
+    public Flux<ExamSessionResponse> getSessionsByExam(Long examId) {
+        return examSessionRepository.findByExamId(examId)
+                .map(ExamSessionResponse::fromEntity);
+    }
+
+    public Flux<UserResponseDTO> getUserResponsesBySession(Long sessionId) {
+        return userResponseRepository.findBySessionId(sessionId)
+                .flatMap(response -> questionRepository.findById(response.getQuestionId())
+                        .map(question -> UserResponseDTO.builder()
+                                .id(response.getId())
+                                .sessionId(response.getSessionId())
+                                .questionId(response.getQuestionId())
+                                .answerId(response.getAnswerId())
+                                .responseText(response.getResponseText())
+                                .isCorrect(response.getIsCorrect())
+                                .pointsEarned(response.getPointsEarned())
+                                .respondedAt(response.getRespondedAt())
+                                .questionText(question.getQuestionText())
+                                .questionType(question.getType().name())
+                                .questionPoints(question.getPoints())
+                                .build()));
+    }
+
+    public Mono<UserResponseDTO> updateShortAnswerCorrection(Long responseId, Boolean isCorrect) {
+        return userResponseRepository.findById(responseId)
+                .flatMap(response -> {
+                    if (response.getResponseText() == null || response.getResponseText().isEmpty()) {
+                        return Mono.error(new RuntimeException("This is not a short answer response"));
+                    }
+
+                    return questionRepository.findById(response.getQuestionId())
+                            .flatMap(question -> {
+                                if (question.getType() != Question.QuestionType.SHORT_ANSWER) {
+                                    return Mono.error(new RuntimeException("This question is not a short answer type"));
+                                }
+
+                                response.setIsCorrect(isCorrect);
+                                response.setPointsEarned(isCorrect ? question.getPoints() : 0);
+
+                                return userResponseRepository.save(response)
+                                        .flatMap(savedResponse -> examSessionRepository.findById(response.getSessionId())
+                                                .flatMap(session -> updateSessionScore(
+                                                        session,
+                                                        isCorrect ? question.getPoints() : -question.getPoints())
+                                                        .thenReturn(UserResponseDTO.builder()
+                                                                .id(savedResponse.getId())
+                                                                .sessionId(savedResponse.getSessionId())
+                                                                .questionId(savedResponse.getQuestionId())
+                                                                .answerId(savedResponse.getAnswerId())
+                                                                .responseText(savedResponse.getResponseText())
+                                                                .isCorrect(savedResponse.getIsCorrect())
+                                                                .pointsEarned(savedResponse.getPointsEarned())
+                                                                .respondedAt(savedResponse.getRespondedAt())
+                                                                .questionText(question.getQuestionText())
+                                                                .questionType(question.getType().name())
+                                                                .questionPoints(question.getPoints())
+                                                                .build())));
+                            });
+                });
+    }
 }
