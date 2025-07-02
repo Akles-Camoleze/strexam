@@ -170,7 +170,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
               children: [
                 Text('Usuário ID: ${session.userId}'),
                 Text('Status: ${_getStatusText(session.status)}'),
-                Text('Pontuação: ${session.totalScore}/${session.maxScore} (${session.percentage != null ? '${(session.percentage! * 100).toStringAsFixed(1)}%' : 'N/A'})'),
+                Text('Pontuação: ${session.totalScore}/${session.maxScore} (${session.percentage != null ? '${session.percentage!.toStringAsFixed(1)}%' : 'N/A'})'),
                 if (session.startedAt != null)
                   Text('Iniciado em: ${_formatDateTime(session.startedAt!)}'),
                 if (session.completedAt != null)
