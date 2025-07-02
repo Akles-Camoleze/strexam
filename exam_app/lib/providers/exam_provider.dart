@@ -20,6 +20,8 @@ class ExamProvider with ChangeNotifier {
   Exam? _currentExam;
   ExamSession? _currentSession;
   List<Exam> _hostExams = [];
+  List<Exam> _joinedExams = [];
+  List<ExamSession> _userSessions = [];
 
   StreamSubscription<ExamEvent>? _examEventSubscription;
   bool _isConnected = false;
@@ -37,6 +39,8 @@ class ExamProvider with ChangeNotifier {
   Exam? get currentExam => _currentExam;
   ExamSession? get currentSession => _currentSession;
   List<Exam> get hostExams => _hostExams;
+  List<Exam> get joinedExams => _joinedExams;
+  List<ExamSession> get userSessions => _userSessions;
   bool get isConnected => _isConnected;
   List<ExamEvent> get recentEvents => _recentEvents;
   int get currentQuestionIndex => _currentQuestionIndex;
@@ -85,6 +89,32 @@ class ExamProvider with ChangeNotifier {
 
     try {
       _hostExams = await _apiService.getExamsByHost(hostUserId);
+    } catch (e) {
+      _setError(e.toString());
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> loadJoinedExams(int userId) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      _joinedExams = await _apiService.getExamsByParticipant(userId);
+    } catch (e) {
+      _setError(e.toString());
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> loadUserSessions(int userId) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      _userSessions = await _apiService.getSessionsByParticipant(userId);
     } catch (e) {
       _setError(e.toString());
     } finally {

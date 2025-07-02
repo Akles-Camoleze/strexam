@@ -325,8 +325,20 @@ public class ExamService {
                 .flatMap(exam -> buildExamResponse(exam, true));
     }
 
+    public Flux<ExamResponse> getExamsByParticipant(Long userId) {
+        return examSessionRepository.findByUserId(userId)
+                .flatMap(session -> examRepository.findById(session.getExamId()))
+                .distinct()
+                .flatMap(exam -> buildExamResponse(exam, false));
+    }
+
     public Flux<ExamSessionResponse> getSessionsByExam(Long examId) {
         return examSessionRepository.findByExamId(examId)
+                .map(ExamSessionResponse::fromEntity);
+    }
+
+    public Flux<ExamSessionResponse> getSessionsByParticipant(Long userId) {
+        return examSessionRepository.findByUserId(userId)
                 .map(ExamSessionResponse::fromEntity);
     }
 

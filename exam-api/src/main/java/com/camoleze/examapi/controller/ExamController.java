@@ -42,6 +42,18 @@ public class ExamController {
         return examService.getExamsByHost(hostUserId);
     }
 
+    @GetMapping("/participant/{userId}")
+    public Flux<ExamResponse> getExamsByParticipant(@PathVariable("userId") Long userId) {
+        log.info("Getting exams for participant {}", userId);
+        return examService.getExamsByParticipant(userId);
+    }
+
+    @GetMapping("/participant/{userId}/sessions")
+    public Flux<ExamSessionResponse> getSessionsByParticipant(@PathVariable("userId") Long userId) {
+        log.info("Getting sessions for participant {}", userId);
+        return examService.getSessionsByParticipant(userId);
+    }
+
     @PostMapping("/join")
     public Mono<ExamSessionResponse> joinExam(@Valid @RequestBody ExamJoinRequest request) {
         log.info("User {} joining exam with code {}", request.getUserId(), request.getJoinCode());

@@ -1,3 +1,4 @@
+import 'package:exam_app/screens/user_sessions_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -15,13 +16,33 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadHostExams();
+      _loadExams();
     });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _loadExams() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final examProvider = Provider.of<ExamProvider>(context, listen: false);
+
+    if (authProvider.currentUser != null) {
+      examProvider.loadHostExams(authProvider.currentUser!.id);
+      examProvider.loadJoinedExams(authProvider.currentUser!.id);
+    }
   }
 
   void _loadHostExams() {
@@ -114,31 +135,52 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Meus Exames',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: _loadHostExams,
-                      icon: const Icon(Icons.refresh),
-                    ),
+                // Tab bar
+                TabBar(
+                  controller: _tabController,
+                  tabs: const [
+                    Tab(text: 'Exames Criados'),
+                    Tab(text: 'Exames Participados'),
                   ],
                 ),
                 const SizedBox(height: 16),
 
+                // Refresh button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      onPressed: _loadExams,
+                      icon: const Icon(Icons.refresh),
+                      tooltip: 'Atualizar',
+                    ),
+                  ],
+                ),
+
+                // Tab content
                 Expanded(
-                  child: examProvider.isLoading
-                      ? const LoadingWidget()
-                      : examProvider.error != null
-                      ? _buildErrorState(examProvider.error!)
-                      : examProvider.hostExams.isEmpty
-                      ? _buildEmptyState()
-                      : _buildExamsList(examProvider.hostExams),
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      // Created exams tab
+                      examProvider.isLoading
+                          ? const LoadingWidget()
+                          : examProvider.error != null
+                          ? _buildErrorState(examProvider.error!)
+                          : examProvider.hostExams.isEmpty
+                          ? _buildEmptyState(isCreatedExams: true)
+                          : _buildExamsList(examProvider.hostExams),
+
+                      // Joined exams tab
+                      examProvider.isLoading
+                          ? const LoadingWidget()
+                          : examProvider.error != null
+                          ? _buildErrorState(examProvider.error!)
+                          : examProvider.joinedExams.isEmpty
+                          ? _buildEmptyState(isCreatedExams: false)
+                          : _buildJoinedExamsList(examProvider.joinedExams),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -184,38 +226,88 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState({bool isCreatedExams = true}) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.quiz_outlined,
+            isCreatedExams ? Icons.quiz_outlined : Icons.history_edu_outlined,
             size: 80,
             color: Colors.grey[400],
           ),
           const SizedBox(height: 16),
           Text(
-            'Não existem exames criados',
+            isCreatedExams 
+                ? 'Não existem exames criados' 
+                : 'Não existem exames participados',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: Colors.grey[600],
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Crie o seu primeiro exame e aproveite!',
+            isCreatedExams
+                ? 'Crie o seu primeiro exame e aproveite!'
+                : 'Participe de um exame usando o código de acesso',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Colors.grey[500],
             ),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () => _navigateToCreateExam(),
-            icon: const Icon(Icons.add),
-            label: const Text('Criar Exame'),
+            onPressed: isCreatedExams 
+                ? () => _navigateToCreateExam()
+                : () => _navigateToJoinExam(),
+            icon: Icon(isCreatedExams ? Icons.add : Icons.login),
+            label: Text(isCreatedExams ? 'Criar Exame' : 'Entrar no Exame'),
+            style: isCreatedExams 
+                ? null 
+                : ElevatedButton.styleFrom(backgroundColor: Colors.green),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildJoinedExamsList(List<Exam> exams) {
+    return ListView.builder(
+      itemCount: exams.length,
+      itemBuilder: (context, index) {
+        final exam = exams[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: _getStatusColor(exam.status),
+              child: Icon(
+                _getStatusIcon(exam.status),
+                color: Colors.white,
+              ),
+            ),
+            title: Text(
+              exam.title,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (exam.description != null && exam.description!.isNotEmpty)
+                  Text(exam.description!),
+                const SizedBox(height: 4),
+                Text('Status: ${exam.status.name.toUpperCase()}'),
+                if (exam.timeLimit != null)
+                  Text('Duração: ${exam.timeLimit} minutos'),
+              ],
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.visibility),
+              onPressed: () => _navigateToSessionsList(exam),
+              tooltip: 'Ver Sessões',
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -344,6 +436,22 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => JoinExamScreen()),
+    );
+  }
+
+  void _navigateToSessionsList(Exam exam) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (authProvider.currentUser == null) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserSessionsScreen(
+          examId: exam.id,
+          examTitle: exam.title,
+          userId: authProvider.currentUser!.id,
+        ),
+      ),
     );
   }
 

@@ -5,13 +5,13 @@ import '../widgets/common/loading_widget.dart';
 
 class SessionResponsesScreen extends StatefulWidget {
   final int sessionId;
-  final int examId;
+  final int? examId;
   final String examTitle;
 
   const SessionResponsesScreen({
     Key? key,
     required this.sessionId,
-    required this.examId,
+    this.examId,
     required this.examTitle,
   }) : super(key: key);
 
@@ -37,41 +37,54 @@ class _SessionResponsesScreenState extends State<SessionResponsesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Respostas - Sessão #${widget.sessionId}'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadResponses,
-          ),
-        ],
+        title: Text('Respostas: ${widget.examTitle}'),
       ),
       body: Consumer<ExamProvider>(
         builder: (context, examProvider, _) {
-          if (examProvider.isLoadingResponses) {
-            return const LoadingWidget();
-          }
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Suas respostas',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Veja suas respostas e pontuações para cada questão',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                ),
+                const SizedBox(height: 24),
 
-          if (examProvider.error != null) {
-            return _buildErrorState(examProvider.error!);
-          }
+                // Refresh button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      onPressed: _loadResponses,
+                      icon: const Icon(Icons.refresh),
+                      tooltip: 'Atualizar',
+                    ),
+                  ],
+                ),
 
-          if (examProvider.userResponses.isEmpty) {
-            return _buildEmptyState();
-          }
-
-          // Filter only short answer responses
-          final shortAnswerResponses = examProvider.userResponses
-              .where((response) => 
-                  response['questionType'] == 'SHORT_ANSWER' && 
-                  response['responseText'] != null && 
-                  response['responseText'].toString().isNotEmpty)
-              .toList();
-
-          if (shortAnswerResponses.isEmpty) {
-            return _buildNoShortAnswersState();
-          }
-
-          return _buildResponsesList(shortAnswerResponses);
+                Expanded(
+                  child: examProvider.isLoadingResponses
+                      ? const LoadingWidget()
+                      : examProvider.error != null
+                          ? _buildErrorState(examProvider.error!)
+                          : examProvider.userResponses.isEmpty
+                              ? _buildEmptyState()
+                              : _buildResponsesList(examProvider.userResponses),
+                ),
+              ],
+            ),
+          );
         },
       ),
     );
@@ -132,51 +145,11 @@ class _SessionResponsesScreenState extends State<SessionResponsesScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'O participante não respondeu nenhuma questão.',
+            'Não há respostas registradas para esta sessão',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[500],
                 ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: _loadResponses,
-            icon: const Icon(Icons.refresh),
-            label: const Text('Atualizar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNoShortAnswersState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.short_text,
-            size: 80,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Nenhuma resposta curta encontrada',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'O participante não respondeu nenhuma questão de resposta curta.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[500],
-                ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: _loadResponses,
-            icon: const Icon(Icons.refresh),
-            label: const Text('Atualizar'),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -184,116 +157,152 @@ class _SessionResponsesScreenState extends State<SessionResponsesScreen> {
   }
 
   Widget _buildResponsesList(List<Map<String, dynamic>> responses) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: responses.length,
-      itemBuilder: (context, index) {
-        final response = responses[index];
-        final isCorrect = response['isCorrect'] as bool;
-        
-        return Card(
+    // Sort responses by question ID
+    responses.sort((a, b) => (a['questionId'] as int).compareTo(b['questionId'] as int));
+
+    // Calculate total score
+    int totalPoints = 0;
+    int maxPoints = 0;
+
+    for (var response in responses) {
+      totalPoints += (response['pointsEarned'] as int?) ?? 0;
+      maxPoints += (response['questionPoints'] as int?) ?? 0;
+    }
+
+    return Column(
+      children: [
+        // Summary card
+        Card(
           margin: const EdgeInsets.only(bottom: 16),
           child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Questão ${index + 1}',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  response['questionText'] as String,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Resposta do participante:',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey[300]!),
-                  ),
-                  child: Text(
-                    response['responseText'] as String,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Pontos possíveis: ${response['questionPoints']}',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      'Pontuação Total',
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const Spacer(),
+                    const SizedBox(height: 4),
                     Text(
-                      'Resposta correta?',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(width: 8),
-                    Switch(
-                      value: isCorrect,
-                      activeColor: Colors.green,
-                      onChanged: (value) => _updateCorrection(response['id'] as int, value),
+                      '$totalPoints de $maxPoints pontos',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: totalPoints > (maxPoints / 2) ? Colors.green[700] : Colors.red[700],
+                      ),
                     ),
                   ],
                 ),
-                if (isCorrect)
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.green[50],
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: Colors.green[300]!),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.check_circle, color: Colors.green[700], size: 16),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Resposta marcada como correta',
-                          style: TextStyle(color: Colors.green[700]),
-                        ),
-                      ],
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: totalPoints > (maxPoints / 2) ? Colors.green[100] : Colors.red[100],
+                  child: Text(
+                    '${((totalPoints / maxPoints) * 100).round()}%',
+                    style: TextStyle(
+                      color: totalPoints > (maxPoints / 2) ? Colors.green[700] : Colors.red[700],
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                ),
               ],
             ),
           ),
-        );
-      },
-    );
-  }
+        ),
 
-  void _updateCorrection(int responseId, bool isCorrect) async {
-    final examProvider = Provider.of<ExamProvider>(context, listen: false);
-    final success = await examProvider.updateShortAnswerCorrection(responseId, isCorrect);
-    
-    if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Resposta ${isCorrect ? 'marcada como correta' : 'marcada como incorreta'}'),
-          backgroundColor: isCorrect ? Colors.green : Colors.red,
+        // Responses list
+        Expanded(
+          child: ListView.builder(
+            itemCount: responses.length,
+            itemBuilder: (context, index) {
+              final response = responses[index];
+              final isCorrect = response['isCorrect'] as bool? ?? false;
+              final pointsEarned = response['pointsEarned'] as int? ?? 0;
+              final questionPoints = response['questionPoints'] as int? ?? 0;
+              final questionText = response['questionText'] as String? ?? 'Questão sem texto';
+              final questionType = response['questionType'] as String? ?? 'UNKNOWN';
+              final responseText = response['responseText'] as String?;
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            isCorrect ? Icons.check_circle : Icons.cancel,
+                            color: isCorrect ? Colors.green : Colors.red,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Questão ${index + 1}',
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: isCorrect ? Colors.green[100] : Colors.red[100],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '$pointsEarned/$questionPoints pts',
+                              style: TextStyle(
+                                color: isCorrect ? Colors.green[700] : Colors.red[700],
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        questionText,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Tipo: $questionType',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Sua resposta:',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey[300]!),
+                        ),
+                        child: Text(
+                          responseText ?? 'Sem resposta',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
         ),
-      );
-    } else if (mounted && examProvider.error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(examProvider.error!),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+      ],
+    );
   }
 }

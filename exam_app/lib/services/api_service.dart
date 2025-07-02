@@ -90,6 +90,28 @@ class ApiService {
     }
   }
 
+  Future<List<Exam>> getExamsByParticipant(int userId) async {
+    try {
+      final response = await _dio.get('/exams/participant/$userId');
+      return (response.data as List)
+          .map((json) => Exam.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<List<ExamSession>> getSessionsByParticipant(int userId) async {
+    try {
+      final response = await _dio.get('/exams/participant/$userId/sessions');
+      return (response.data as List)
+          .map((json) => ExamSession.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   Future<ExamSession> joinExam(ExamJoinRequest request) async {
     try {
       final response = await _dio.post('/exams/join', data: request.toJson());
