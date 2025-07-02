@@ -1,9 +1,10 @@
+import 'package:exam_app/screens/session_responses_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/exam_provider.dart';
 import '../models/exam_session.dart';
 import '../widgets/common/loading_widget.dart';
-import 'session_responses_screen.dart';
+import 'session_correction_screen.dart';
 
 class SessionsListScreen extends StatefulWidget {
   final int examId;
@@ -137,7 +138,6 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
   }
 
   Widget _buildSessionsList(List<ExamSession> sessions) {
-    // Sort sessions by status (completed first) and then by id
     final sortedSessions = List<ExamSession>.from(sessions)
       ..sort((a, b) {
         if (a.status == SessionStatus.completed && b.status != SessionStatus.completed) {
@@ -145,7 +145,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
         } else if (a.status != SessionStatus.completed && b.status == SessionStatus.completed) {
           return 1;
         } else {
-          return b.id.compareTo(a.id); // Most recent first
+          return b.id.compareTo(a.id);
         }
       });
 
@@ -236,7 +236,20 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SessionResponsesScreen(
+        builder: (context) => SessionCorrectionScreen(
+          sessionId: session.id,
+          examId: widget.examId,
+          examTitle: widget.examTitle,
+        ),
+      ),
+    );
+  }
+
+  void _navigateToSessionCorrection(ExamSession session) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SessionCorrectionScreen(
           sessionId: session.id,
           examId: widget.examId,
           examTitle: widget.examTitle,

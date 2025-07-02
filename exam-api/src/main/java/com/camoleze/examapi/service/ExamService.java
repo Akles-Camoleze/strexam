@@ -345,19 +345,39 @@ public class ExamService {
     public Flux<UserResponseDTO> getUserResponsesBySession(Long sessionId) {
         return userResponseRepository.findBySessionId(sessionId)
                 .flatMap(response -> questionRepository.findById(response.getQuestionId())
-                        .map(question -> UserResponseDTO.builder()
-                                .id(response.getId())
-                                .sessionId(response.getSessionId())
-                                .questionId(response.getQuestionId())
-                                .answerId(response.getAnswerId())
-                                .responseText(response.getResponseText())
-                                .isCorrect(response.getIsCorrect())
-                                .pointsEarned(response.getPointsEarned())
-                                .respondedAt(response.getRespondedAt())
-                                .questionText(question.getQuestionText())
-                                .questionType(question.getType().name())
-                                .questionPoints(question.getPoints())
-                                .build()));
+                        .flatMap(question -> {
+                            if (response.getAnswerId() != null) {
+                                return answerRepository.findById(response.getAnswerId())
+                                        .map(answer -> UserResponseDTO.builder()
+                                                .id(response.getId())
+                                                .sessionId(response.getSessionId())
+                                                .questionId(response.getQuestionId())
+                                                .answerId(response.getAnswerId())
+                                                .responseText(response.getResponseText())
+                                                .isCorrect(response.getIsCorrect())
+                                                .pointsEarned(response.getPointsEarned())
+                                                .respondedAt(response.getRespondedAt())
+                                                .questionText(question.getQuestionText())
+                                                .questionType(question.getType().name())
+                                                .questionPoints(question.getPoints())
+                                                .answerText(answer.getAnswerText())
+                                                .build());
+                            } else {
+                                return Mono.just(UserResponseDTO.builder()
+                                        .id(response.getId())
+                                        .sessionId(response.getSessionId())
+                                        .questionId(response.getQuestionId())
+                                        .answerId(response.getAnswerId())
+                                        .responseText(response.getResponseText())
+                                        .isCorrect(response.getIsCorrect())
+                                        .pointsEarned(response.getPointsEarned())
+                                        .respondedAt(response.getRespondedAt())
+                                        .questionText(question.getQuestionText())
+                                        .questionType(question.getType().name())
+                                        .questionPoints(question.getPoints())
+                                        .build());
+                            }
+                        }));
     }
 
     public Mono<UserResponseDTO> updateShortAnswerCorrection(Long responseId, Boolean isCorrect) {
@@ -381,7 +401,23 @@ public class ExamService {
                                                 .flatMap(session -> updateSessionScore(
                                                         session,
                                                         isCorrect ? question.getPoints() : -question.getPoints())
-                                                        .thenReturn(UserResponseDTO.builder()
+                                                        .then(savedResponse.getAnswerId() != null 
+                                                            ? answerRepository.findById(savedResponse.getAnswerId())
+                                                                .map(answer -> UserResponseDTO.builder()
+                                                                    .id(savedResponse.getId())
+                                                                    .sessionId(savedResponse.getSessionId())
+                                                                    .questionId(savedResponse.getQuestionId())
+                                                                    .answerId(savedResponse.getAnswerId())
+                                                                    .responseText(savedResponse.getResponseText())
+                                                                    .isCorrect(savedResponse.getIsCorrect())
+                                                                    .pointsEarned(savedResponse.getPointsEarned())
+                                                                    .respondedAt(savedResponse.getRespondedAt())
+                                                                    .questionText(question.getQuestionText())
+                                                                    .questionType(question.getType().name())
+                                                                    .questionPoints(question.getPoints())
+                                                                    .answerText(answer.getAnswerText())
+                                                                    .build())
+                                                            : Mono.just(UserResponseDTO.builder()
                                                                 .id(savedResponse.getId())
                                                                 .sessionId(savedResponse.getSessionId())
                                                                 .questionId(savedResponse.getQuestionId())
@@ -393,7 +429,7 @@ public class ExamService {
                                                                 .questionText(question.getQuestionText())
                                                                 .questionType(question.getType().name())
                                                                 .questionPoints(question.getPoints())
-                                                                .build())));
+                                                                .build()))));
                             });
                 });
     }

@@ -61,7 +61,6 @@ class _SessionResponsesScreenState extends State<SessionResponsesScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Refresh button
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -157,10 +156,8 @@ class _SessionResponsesScreenState extends State<SessionResponsesScreen> {
   }
 
   Widget _buildResponsesList(List<Map<String, dynamic>> responses) {
-    // Sort responses by question ID
     responses.sort((a, b) => (a['questionId'] as int).compareTo(b['questionId'] as int));
 
-    // Calculate total score
     int totalPoints = 0;
     int maxPoints = 0;
 
@@ -224,6 +221,11 @@ class _SessionResponsesScreenState extends State<SessionResponsesScreen> {
               final questionText = response['questionText'] as String? ?? 'Questão sem texto';
               final questionType = response['questionType'] as String? ?? 'UNKNOWN';
               final responseText = response['responseText'] as String?;
+              final answerText = response['answerText'] as String?;
+
+              final displayText = questionType == 'SHORT_ANSWER'
+                  ? responseText 
+                  : answerText;
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -291,7 +293,7 @@ class _SessionResponsesScreenState extends State<SessionResponsesScreen> {
                           border: Border.all(color: Colors.grey[300]!),
                         ),
                         child: Text(
-                          responseText ?? 'Sem resposta',
+                          displayText ?? 'Sem resposta',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ),

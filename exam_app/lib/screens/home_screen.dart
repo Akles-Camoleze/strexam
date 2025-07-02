@@ -157,12 +157,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   ],
                 ),
 
-                // Tab content
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
                     children: [
-                      // Created exams tab
                       examProvider.isLoading
                           ? const LoadingWidget()
                           : examProvider.error != null
@@ -171,7 +169,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           ? _buildEmptyState(isCreatedExams: true)
                           : _buildExamsList(examProvider.hostExams),
 
-                      // Joined exams tab
                       examProvider.isLoading
                           ? const LoadingWidget()
                           : examProvider.error != null
