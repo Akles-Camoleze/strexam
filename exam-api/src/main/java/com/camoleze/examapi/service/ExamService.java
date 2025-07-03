@@ -37,7 +37,8 @@ public class ExamService {
                         .allowRetake(request.getAllowRetake())
                         .build())
                 .flatMap(savedExam -> saveQuestionsAndAnswers(savedExam, request.getQuestions())
-                        .then(Mono.just(ExamResponse.fromEntity(savedExam))));
+                        .then(examRepository.findById(savedExam.getId()))
+                        .map(ExamResponse::fromEntity));
     }
 
     private Mono<Void> saveQuestionsAndAnswers(Exam exam, List<ExamCreateRequest.QuestionCreateRequest> questions) {
