@@ -157,7 +157,7 @@ public class ExamService {
 
     public Mono<Void> submitAnswer(AnswerSubmissionRequest request) {
         return examSessionRepository.findById(request.getSessionId())
-                .switchIfEmpty(Mono.error(new RuntimeException("Session not found")))
+                .switchIfEmpty(Mono.error(new RuntimeException("Sessão não encontrada")))
                 .flatMap(session -> processAnswerSubmission(session, request)
                         .doOnSuccess(response -> {
                             broadcastEvent(ExamEvent.builder()
@@ -385,13 +385,13 @@ public class ExamService {
         return userResponseRepository.findById(responseId)
                 .flatMap(response -> {
                     if (response.getResponseText() == null || response.getResponseText().isEmpty()) {
-                        return Mono.error(new RuntimeException("This is not a short answer response"));
+                        return Mono.error(new RuntimeException("Esta não é uma resposta de texto curto"));
                     }
 
                     return questionRepository.findById(response.getQuestionId())
                             .flatMap(question -> {
                                 if (question.getType() != Question.QuestionType.SHORT_ANSWER) {
-                                    return Mono.error(new RuntimeException("This question is not a short answer type"));
+                                    return Mono.error(new RuntimeException("Esta questão não é do tipo resposta curta"));
                                 }
 
                                 response.setIsCorrect(isCorrect);

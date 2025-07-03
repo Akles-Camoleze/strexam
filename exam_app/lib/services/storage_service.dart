@@ -15,7 +15,6 @@ class StorageService {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  // User storage
   Future<void> saveCurrentUser(User user) async {
     final userJson = json.encode(user.toJson());
     await _prefs?.setString(AppConfig.userKey, userJson);
@@ -33,7 +32,6 @@ class StorageService {
     await _prefs?.remove(AppConfig.userKey);
   }
 
-  // Token storage
   Future<void> saveToken(String token) async {
     await _prefs?.setString(AppConfig.tokenKey, token);
   }
@@ -63,7 +61,6 @@ class StorageService {
     await _prefs?.remove(AppConfig.sessionKey);
   }
 
-  // Generic storage methods
   Future<void> setString(String key, String value) async {
     await _prefs?.setString(key, value);
   }

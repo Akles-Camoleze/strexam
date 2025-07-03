@@ -45,19 +45,16 @@ mixin ServiceMixin {
       switch (error.type) {
         case DioExceptionType.connectionTimeout:
         case DioExceptionType.receiveTimeout:
-          return Exception(
-              'Connection timeout. Please check your internet connection.');
+          return Exception('Verifique sua conexão com a internet.');
         case DioExceptionType.badResponse:
-          final statusCode = error.response?.statusCode;
-          final message =
-              error.response?.data?['error'] ?? 'Server error occurred';
-          return Exception('Server error ($statusCode): $message');
+          final message = error.response?.data?['error'] ?? 'Ocorreu um erro no servidor';
+          return Exception(message);
         case DioExceptionType.cancel:
-          return Exception('Request was cancelled');
+          return Exception('Requisição cancelada');
         default:
-          return Exception('Network error: ${error.message}');
+          return Exception(error.message);
       }
     }
-    return Exception('Unexpected error: $error');
+    return Exception(error);
   }
 }
