@@ -9,4 +9,5 @@ class AppConfig {
   // Storage keys
   static const String userKey = 'current_user';
   static const String sessionKey = 'current_session';
+  static const String tokenKey = 'auth_token';
 }

@@ -13,6 +13,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _fullNameController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   bool _isCreatingAccount = false;
 
@@ -21,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
     _usernameController.dispose();
     _emailController.dispose();
     _fullNameController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -67,6 +69,24 @@ class _LoginScreenState extends State<LoginScreen> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Por favor, insira o nome de usuário';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Password field
+                  TextFormField(
+                    controller: _passwordController,
+                    decoration: const InputDecoration(
+                      labelText: 'Senha',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.lock),
+                    ),
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, insira a senha';
                       }
                       return null;
                     },
@@ -170,9 +190,13 @@ class _LoginScreenState extends State<LoginScreen> {
         _usernameController.text.trim(),
         _emailController.text.trim(),
         _fullNameController.text.trim(),
+        _passwordController.text,
       );
     } else {
-      success = await authProvider.loginWithUsername(_usernameController.text.trim());
+      success = await authProvider.login(
+        _usernameController.text.trim(),
+        _passwordController.text,
+      );
     }
 
     if (success) {

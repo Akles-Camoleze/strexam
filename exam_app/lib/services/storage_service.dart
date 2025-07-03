@@ -33,7 +33,19 @@ class StorageService {
     await _prefs?.remove(AppConfig.userKey);
   }
 
-  // Session storage
+  // Token storage
+  Future<void> saveToken(String token) async {
+    await _prefs?.setString(AppConfig.tokenKey, token);
+  }
+
+  String? getToken() {
+    return _prefs?.getString(AppConfig.tokenKey);
+  }
+
+  Future<void> removeToken() async {
+    await _prefs?.remove(AppConfig.tokenKey);
+  }
+
   Future<void> saveCurrentSession(ExamSession session) async {
     final sessionJson = json.encode(session.toJson());
     await _prefs?.setString(AppConfig.sessionKey, sessionJson);

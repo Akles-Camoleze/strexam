@@ -93,11 +93,13 @@ class UserCreateRequest {
   final String username;
   final String email;
   final String fullName;
+  final String password;
 
   UserCreateRequest({
     required this.username,
     required this.email,
     required this.fullName,
+    required this.password,
   });
 
   factory UserCreateRequest.fromJson(Map<String, dynamic> json) => _$UserCreateRequestFromJson(json);

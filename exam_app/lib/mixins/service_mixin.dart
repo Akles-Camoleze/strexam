@@ -1,19 +1,33 @@
 import 'package:dio/dio.dart';
+
 import '../config/app_config.dart';
+import '../services/storage_service.dart';
 
 mixin ServiceMixin {
+  final StorageService _storageService = StorageService();
+
   late final Dio _dio = _createDio();
 
   Dio get dio => _dio;
 
   Dio _createDio() {
-    final dio = Dio(BaseOptions(
+    Dio dio = Dio(BaseOptions(
       baseUrl: AppConfig.baseUrl,
       connectTimeout: AppConfig.connectionTimeout,
       receiveTimeout: AppConfig.receiveTimeout,
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+      },
+    ));
+
+    dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) {
+        final token = _storageService.getToken();
+        if (token != null) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
+        return handler.next(options);
       },
     ));
 
@@ -31,10 +45,12 @@ mixin ServiceMixin {
       switch (error.type) {
         case DioExceptionType.connectionTimeout:
         case DioExceptionType.receiveTimeout:
-          return Exception('Connection timeout. Please check your internet connection.');
+          return Exception(
+              'Connection timeout. Please check your internet connection.');
         case DioExceptionType.badResponse:
           final statusCode = error.response?.statusCode;
-          final message = error.response?.data?['error'] ?? 'Server error occurred';
+          final message =
+              error.response?.data?['error'] ?? 'Server error occurred';
           return Exception('Server error ($statusCode): $message');
         case DioExceptionType.cancel:
           return Exception('Request was cancelled');

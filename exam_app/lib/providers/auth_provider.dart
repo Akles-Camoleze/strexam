@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../models/auth_request.dart';
 import '../models/user.dart';
 import '../models/request_models.dart';
 import '../services/api_service.dart';
@@ -26,7 +27,7 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> createUser(String username, String email, String fullName) async {
+  Future<bool> createUser(String username, String email, String fullName, String password) async {
     _setLoading(true);
     _clearError();
 
@@ -35,10 +36,12 @@ class AuthProvider with ChangeNotifier {
         username: username,
         email: email,
         fullName: fullName,
+        password: password,
       );
 
-      final user = await _apiService.createUser(request);
-      await _setCurrentUser(user);
+      final response = await _apiService.register(request);
+      await _setCurrentUser(response.user);
+      await _storageService.saveToken(response.token);
       return true;
     } catch (e) {
       _setError(e.toString());
@@ -48,13 +51,23 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> loginWithUsername(String username) async {
+  Future<bool> login(String username, String password) async {
     _setLoading(true);
     _clearError();
 
     try {
-      final user = await _apiService.getUserByUsername(username);
-      await _setCurrentUser(user);
+      final request = AuthRequest(
+        username: username,
+        password: password,
+      );
+
+      final response = await _apiService.login(request);
+
+      await _setCurrentUser(response.user);
+
+      print(response);
+
+      await _storageService.saveToken(response.token);
       return true;
     } catch (e) {
       _setError(e.toString());
@@ -68,6 +81,7 @@ class AuthProvider with ChangeNotifier {
     _currentUser = null;
     await _storageService.removeCurrentUser();
     await _storageService.removeCurrentSession();
+    await _storageService.removeToken();
     notifyListeners();
   }
 

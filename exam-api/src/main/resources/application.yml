@@ -21,8 +21,12 @@ spring:
 server:
   port: 9000
 
+jwt:
+  secret: dGhpc2lzYXZlcnlzZWN1cmVqd3RrZXl0aGF0aXNiYXNlNjQ=
+
 logging:
   level:
     com.camoleze.examapi: DEBUG
     org.springframework.r2dbc: DEBUG
+    org.springframework.security: DEBUG
     org.flywaydb: DEBUG

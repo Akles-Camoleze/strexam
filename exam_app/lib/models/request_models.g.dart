@@ -96,6 +96,7 @@ UserCreateRequest _$UserCreateRequestFromJson(Map<String, dynamic> json) =>
       username: json['username'] as String,
       email: json['email'] as String,
       fullName: json['fullName'] as String,
+      password: json['password'] as String,
     );
 
 Map<String, dynamic> _$UserCreateRequestToJson(UserCreateRequest instance) =>
@@ -103,4 +104,5 @@ Map<String, dynamic> _$UserCreateRequestToJson(UserCreateRequest instance) =>
       'username': instance.username,
       'email': instance.email,
       'fullName': instance.fullName,
+      'password': instance.password,
     };
