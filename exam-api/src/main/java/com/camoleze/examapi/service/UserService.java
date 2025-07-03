@@ -22,13 +22,13 @@ public class UserService {
         return userRepository.existsByUsername(request.getUsername())
                 .flatMap(usernameExists -> {
                     if (usernameExists) {
-                        return Mono.error(new RuntimeException("Username already exists"));
+                        return Mono.error(new RuntimeException("Nome de usuário já existe"));
                     }
                     return userRepository.existsByEmail(request.getEmail());
                 })
                 .flatMap(emailExists -> {
                     if (emailExists) {
-                        return Mono.error(new RuntimeException("Email already exists"));
+                        return Mono.error(new RuntimeException("Email já existe"));
                     }
 
                     User user = User.builder()
@@ -44,12 +44,12 @@ public class UserService {
 
     public Mono<User> getUserById(Long id) {
         return userRepository.findById(id)
-                .switchIfEmpty(Mono.error(new RuntimeException("User not found")));
+                .switchIfEmpty(Mono.error(new RuntimeException("Usuário não encontrado")));
     }
 
     public Mono<User> getUserByUsername(String username) {
         return userRepository.findByUsername(username)
-                .switchIfEmpty(Mono.error(new RuntimeException("User not found")));
+                .switchIfEmpty(Mono.error(new RuntimeException("Usuário não encontrado")));
     }
 
     public Flux<User> getAllUsers() {
@@ -58,7 +58,7 @@ public class UserService {
 
     public Mono<User> updateUser(Long id, UserCreateRequest request) {
         return userRepository.findById(id)
-                .switchIfEmpty(Mono.error(new RuntimeException("User not found")))
+                .switchIfEmpty(Mono.error(new RuntimeException("Usuário não encontrado")))
                 .flatMap(existingUser -> {
                     User updatedUser = User.builder()
                             .id(existingUser.getId())
