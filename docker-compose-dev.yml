@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16.9-alpine
+    container_name: exam-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: examdb
+      POSTGRES_USER: examuser
+      POSTGRES_PASSWORD: exampass
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U examuser -d examdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
+    name: exam-postgres-data

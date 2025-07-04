@@ -369,6 +369,25 @@ exam_app/
 
 ### Configuração do Banco de Dados
 
+#### Opção 1: Usando Docker Compose (Recomendado)
+
+O projeto inclui configuração Docker Compose para facilitar a configuração do ambiente de desenvolvimento:
+
+1. Certifique-se de ter o Docker e o Docker Compose instalados em sua máquina.
+
+2. Na raiz do projeto, execute:
+   ```bash
+   docker-compose up -d
+   ```
+
+3. Isso iniciará:
+   - Um container PostgreSQL com o banco de dados `examdb`, usuário `examuser` e senha `exampass`
+   - Um container com a API Spring Boot configurada para se conectar ao banco de dados
+
+4. As migrações do Flyway serão executadas automaticamente na inicialização da aplicação.
+
+#### Opção 2: Configuração Manual
+
 1. Crie um banco de dados PostgreSQL:
    ```sql
    CREATE DATABASE examdb;
@@ -386,7 +405,18 @@ exam_app/
    cd strexam
    ```
 
-2. Configure as propriedades da aplicação em `exam-api/src/main/resources/application.yml`:
+#### Opção 1: Usando Docker Compose (Recomendado)
+
+1. Execute o Docker Compose na raiz do projeto:
+   ```bash
+   docker-compose up -d
+   ```
+
+2. O backend estará disponível em `http://localhost:9000`.
+
+#### Opção 2: Configuração Manual
+
+1. Configure as propriedades da aplicação em `exam-api/src/main/resources/application.yml`:
    ```yaml
    spring:
      r2dbc:
@@ -395,14 +425,14 @@ exam_app/
        password: exampass
    ```
 
-3. Compile e execute o backend:
+2. Compile e execute o backend:
    ```bash
    cd exam-api
    mvn clean install
    mvn spring-boot:run
    ```
 
-4. O backend estará disponível em `http://localhost:9000`.
+3. O backend estará disponível em `http://localhost:9000`.
 
 ### Configuração do Frontend
 

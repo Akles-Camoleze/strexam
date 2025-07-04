@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: exam-api
+
+  r2dbc:
+    url: r2dbc:postgresql://postgres:5432/examdb
+    username: examuser
+    password: exampass
+
+  flyway:
+    url: jdbc:postgresql://postgres:5432/examdb
+    user: examuser
+    password: exampass
+    locations: classpath:db/migrations
+    baseline-on-migrate: true
+    clean-disabled: false
+
+  main:
+    web-application-type: reactive
+
+server:
+  port: 9000
+
+jwt:
+  secret: dGhpc2lzYXZlcnlzZWN1cmVqd3RrZXl0aGF0aXNiYXNlNjQ=
+
+logging:
+  level:
+    com.camoleze.examapi: DEBUG
+    org.springframework.r2dbc: DEBUG
+    org.springframework.security: DEBUG
+    org.flywaydb: DEBUG
