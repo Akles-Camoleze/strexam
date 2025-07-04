@@ -7,6 +7,7 @@ import 'providers/statistics_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'services/storage_service.dart';
+import 'core/navigation/route_observer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +29,9 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Strexam',
         debugShowCheckedModeBanner: false,
+        navigatorObservers: [
+          ErrorClearingNavigatorObserver(),
+        ],
         theme: ThemeData(
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,

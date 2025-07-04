@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/statistics_provider.dart';
+import '../mixins/error_clearing_mixin.dart';
 import '../widgets/common/loading_widget.dart';
 import '../widgets/statistics/charts_widget.dart';
 import '../widgets/statistics/user_stats_widget.dart';
@@ -15,13 +16,18 @@ class StatisticsScreen extends StatefulWidget {
   _StatisticsScreenState createState() => _StatisticsScreenState();
 }
 
-class _StatisticsScreenState extends State<StatisticsScreen> with TickerProviderStateMixin {
+class _StatisticsScreenState extends State<StatisticsScreen> 
+    with TickerProviderStateMixin, ErrorClearingMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+
+    // Add listener to clear errors when tab changes
+    addTabControllerListener(_tabController);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadStatistics();
     });

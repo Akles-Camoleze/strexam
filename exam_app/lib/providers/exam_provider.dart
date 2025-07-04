@@ -64,7 +64,17 @@ class ExamProvider with ChangeNotifier {
     super.dispose();
   }
 
-  void clearError() => _clearError();
+  /// Clears any error message
+  /// 
+  /// This method uses a microtask to defer the notifyListeners call,
+  /// which prevents the "setState() or markNeedsBuild() called during build" exception
+  void clearError() {
+    // Use a microtask to defer the state change until after the build phase
+    Future.microtask(() {
+      _error = null;
+      notifyListeners();
+    });
+  }
 
   Future<bool> createExam(ExamCreateRequest request) async {
     _setLoading(true);

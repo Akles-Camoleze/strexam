@@ -105,4 +105,16 @@ class AuthProvider with ChangeNotifier {
     _error = null;
     notifyListeners();
   }
+
+  /// Clears any error message
+  /// 
+  /// This method uses a microtask to defer the notifyListeners call,
+  /// which prevents the "setState() or markNeedsBuild() called during build" exception
+  void clearError() {
+    // Use a microtask to defer the state change until after the build phase
+    Future.microtask(() {
+      _error = null;
+      notifyListeners();
+    });
+  }
 }

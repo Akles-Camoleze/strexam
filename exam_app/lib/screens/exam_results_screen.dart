@@ -18,7 +18,7 @@ class ExamResultsScreen extends StatelessWidget {
               Navigator.of(context).popUntil((route) => route.isFirst);
             },
             child: const Text(
-              'Home',
+              'Início',
               style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
@@ -37,7 +37,6 @@ class ExamResultsScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                // Congratulations header
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
@@ -80,11 +79,9 @@ class ExamResultsScreen extends StatelessWidget {
 
                 const SizedBox(height: 24),
 
-                // Results cards
                 Expanded(
                   child: ListView(
                     children: [
-                      // Score card
                       _buildResultCard(
                         'Sua Nota',
                         '${session.totalScore} / ${session.maxScore}',
@@ -97,7 +94,6 @@ class ExamResultsScreen extends StatelessWidget {
 
                       const SizedBox(height: 16),
 
-                      // Questions answered card
                       _buildResultCard(
                         'Questões Respondidas',
                         '${examProvider.answeredQuestionsCount}',
@@ -108,7 +104,6 @@ class ExamResultsScreen extends StatelessWidget {
 
                       const SizedBox(height: 16),
 
-                      // Time taken card
                       _buildResultCard(
                         'Tempo Gasto',
                         _getTimeTaken(session, exam),
@@ -119,7 +114,6 @@ class ExamResultsScreen extends StatelessWidget {
 
                       const SizedBox(height: 24),
 
-                      // Action buttons
                       Row(
                         children: [
                           Expanded(
@@ -136,7 +130,6 @@ class ExamResultsScreen extends StatelessWidget {
                           Expanded(
                             child: ElevatedButton.icon(
                               onPressed: () {
-                                // TODO: Navigate to detailed results
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text('Resultados detalhados em breve!'),

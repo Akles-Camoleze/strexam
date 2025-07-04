@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/exam_provider.dart';
 import '../models/exam.dart';
+import '../mixins/error_clearing_mixin.dart';
 import 'create_exam_screen.dart';
 import 'join_exam_screen.dart';
 import 'statistics_screen.dart';
@@ -16,13 +17,17 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> 
+    with SingleTickerProviderStateMixin, ErrorClearingMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+
+    // Add listener to clear errors when tab changes
+    addTabControllerListener(_tabController);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadExams();
